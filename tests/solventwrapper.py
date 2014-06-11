@@ -9,6 +9,11 @@ def _config():
     return " --configurationFile=%s " % configurationFile
 
 
+def configureAsOfficial():
+    with open(configurationFile, "a") as f:
+        f.write("OFFICIAL_BUILD: Yes\n")
+
+
 def run(where, arguments):
     try:
         output = subprocess.check_output(

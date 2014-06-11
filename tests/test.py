@@ -96,18 +96,25 @@ class Test(unittest.TestCase):
         solventwrapper.runShouldFail(localClone1, "submitbuild", "osmosis")
         self.osmosisPair = None
 
-#submit officialcandidate -> switched by /etc content
-#
-#-refuse if not from dirbalak
-#-refuse if workspace is dirty
-#-only from clean build rootfs
-#-refuse if git status is not clean
-#-refuse if worksapce is partial
-#
-#submit cleancandidate
-#
-#-doesn't have to be dirbalak
-#
+    def test_SubmitANonUpsetoedProjectOfficialBuild(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        hash = localClone1.hash()
+        localClone1.writeFile("build/product1", "product1 contents")
+
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localClone1, "submitbuild")
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__project1__build__%s__officialcandidate' % hash
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+        self.assertEquals(self.osmosisPair.official.client().listLabels(), [label])
+
+        self.cleanLocalClonesDir()
+        self.osmosisPair.local.client().checkout(path=gitwrapper.localClonesDir(), label=label)
+        self.assertEquals(localClone1.hash(), hash)
+        self.assertTrue(localClone1.fileExists("build/product1"))
+
+
 #submit dirty -> publish
 
 

@@ -2,6 +2,7 @@ import yaml
 
 LOCAL_OSMOSIS = 'localhost:1010'
 OFFICIAL_OSMOSIS = None
+OFFICIAL_BUILD = False
 
 
 def load(filename):
