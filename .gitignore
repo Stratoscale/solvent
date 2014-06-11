@@ -1,0 +1,6 @@
+*.pyc
+*.swp
+build
+dist
+upseto.egg-info
+.coverage
