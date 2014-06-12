@@ -1,5 +1,6 @@
 from solvent import config
 from solvent import run
+from solvent import label
 from upseto import gitwrapper
 import logging
 import os
@@ -11,8 +12,8 @@ class SubmitBuild:
         self._basename = git.originURLBasename()
         self._state = "officialcandidate" if config.OFFICIAL_BUILD else "cleancandidate"
         self._product = "build"
-        self._label = "solvent__%(basename)s__build__%(hash)s__%(state)s" % dict(
-            basename=self._basename, hash=git.hash(), state=self._state)
+        self._label = label.label(
+            basename=self._basename, product="build", hash=git.hash(), state=self._state)
         run.run([
             "python", "-m", "upseto.main", "checkRequirements",
             "--allowNoManifest", "--unsullied", "--gitClean"])

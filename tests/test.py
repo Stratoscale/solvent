@@ -114,8 +114,48 @@ class Test(unittest.TestCase):
         self.assertEquals(localClone1.hash(), hash)
         self.assertTrue(localClone1.fileExists("build/product1"))
 
+    def test_SubmitAndApprove(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        hash = localClone1.hash()
+        localClone1.writeFile("build/product1", "product1 contents")
 
-#submit dirty -> publish
+        solventwrapper.run(localClone1, "submitbuild")
+        solventwrapper.run(localClone1, "approve")
+
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__project1__build__%s__clean' % hash
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+        self.assertEquals(self.osmosisPair.official.client().listLabels(), [label])
+
+        self.cleanLocalClonesDir()
+        self.assertFalse(localClone1.fileExists("build/product1"))
+        self.osmosisPair.local.client().checkout(path=gitwrapper.localClonesDir(), label=label)
+        self.assertEquals(localClone1.hash(), hash)
+        self.assertTrue(localClone1.fileExists("build/product1"))
+
+    def test_SubmitAndApprove_Official(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        hash = localClone1.hash()
+        localClone1.writeFile("build/product1", "product1 contents")
+
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localClone1, "submitbuild")
+        solventwrapper.run(localClone1, "approve")
+
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__project1__build__%s__official' % hash
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+        self.assertEquals(self.osmosisPair.official.client().listLabels(), [label])
+
+        self.cleanLocalClonesDir()
+        self.assertFalse(localClone1.fileExists("build/product1"))
+        self.osmosisPair.local.client().checkout(path=gitwrapper.localClonesDir(), label=label)
+        self.assertEquals(localClone1.hash(), hash)
+        self.assertTrue(localClone1.fileExists("build/product1"))
+
+# submit dirty -> publish
 
 
 if __name__ == '__main__':
