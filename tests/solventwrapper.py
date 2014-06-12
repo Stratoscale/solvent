@@ -14,6 +14,16 @@ def configureAsOfficial():
         f.write("OFFICIAL_BUILD: Yes\n")
 
 
+def configureAsNonOfficial():
+    with open(configurationFile) as f:
+        contents = f.read()
+    with open(configurationFile, "w") as f:
+        for line in contents.strip().split("\n"):
+            if line.startswith("OFFICIAL_BUILD:"):
+                continue
+            f.write(line + "\n")
+
+
 def run(where, arguments):
     try:
         output = subprocess.check_output(

@@ -155,7 +155,72 @@ class Test(unittest.TestCase):
         self.assertEquals(localClone1.hash(), hash)
         self.assertTrue(localClone1.fileExists("build/product1"))
 
+    def test_FulfillUpsetoRequirements(self):
+        localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        localClone1.writeFile("build/product1", "product1 contents")
+        solventwrapper.upseto(localRequiringProject, "fulfillRequirements")
+        localRequiringProject.writeFile("build/product2", "product2 contents")
+
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localRequiringProject, "submitbuild")
+        solventwrapper.run(localRequiringProject, "approve")
+        solventwrapper.configureAsNonOfficial()
+
+        self.cleanLocalClonesDir()
+        localRecursiveProject = gitwrapper.LocalClone(self.recursiveProject)
+        solventwrapper.run(localRecursiveProject, "fulfillrequirements")
+
+        self.assertTrue(localClone1.fileExists("build/product1"))
+        self.assertTrue(localRequiringProject.fileExists("build/product2"))
+
+    def test_NoRequirements_FulfillDoesNothing(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        solventwrapper.run(localClone1, "fulfillrequirements")
+
+    def test_FulfillUpsetoRequirements_MoreThanOneProject(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        localClone1.writeFile("build/product1", "product1 contents")
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localClone1, "submitbuild")
+        solventwrapper.run(localClone1, "approve")
+
+        self.cleanLocalClonesDir()
+        localClone2 = gitwrapper.LocalClone(self.project2)
+        localClone2.writeFile("build/product2", "product2 contents")
+        solventwrapper.run(localClone2, "submitbuild")
+        solventwrapper.run(localClone2, "approve")
+        solventwrapper.configureAsNonOfficial()
+
+        self.cleanLocalClonesDir()
+        localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
+        solventwrapper.run(localRequiringProject, "fulfillrequirements")
+
+        self.assertTrue(localClone1.fileExists("build/product1"))
+        self.assertTrue(localClone2.fileExists("build/product2"))
+
+    def test_FulfillUpsetoRequirements_NoOfficialBuild(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        localClone1.writeFile("build/product1", "product1 contents")
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localClone1, "submitbuild")
+
+        self.cleanLocalClonesDir()
+        localClone2 = gitwrapper.LocalClone(self.project2)
+        localClone2.writeFile("build/product2", "product2 contents")
+        solventwrapper.run(localClone2, "submitbuild")
+        solventwrapper.run(localClone2, "approve")
+        solventwrapper.configureAsNonOfficial()
+
+        self.cleanLocalClonesDir()
+        localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
+        solventwrapper.runShouldFail(localRequiringProject, "fulfillrequirements", "official")
+
 # submit dirty -> publish
+# more than one requirement with osmosis join
+# missing official
+# indirect deep dep joined
+# remove unosmosed files
 
 
 if __name__ == '__main__':
