@@ -3,6 +3,7 @@ import yaml
 LOCAL_OSMOSIS = 'localhost:1010'
 OFFICIAL_OSMOSIS = None
 OFFICIAL_BUILD = False
+WITH_OFFICIAL_OBJECT_STORE = True
 
 
 def load(filename):
@@ -15,17 +16,5 @@ def load(filename):
         raise Exception("Configuration file must contain 'OFFICIAL_OSMOSIS' field")
 
 
-def localOsmosisHostname():
-    return LOCAL_OSMOSIS.split(":")[0]
-
-
-def localOsmosisPort():
-    return int(LOCAL_OSMOSIS.split(":")[1])
-
-
-def officialOsmosisHostname():
-    return OFFICIAL_OSMOSIS.split(":")[0]
-
-
-def officialOsmosisPort():
-    return int(OFFICIAL_OSMOSIS.split(":")[1])
+def objectStoresOsmosisParameter():
+    return LOCAL_OSMOSIS + "+" + OFFICIAL_OSMOSIS

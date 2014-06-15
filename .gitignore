@@ -3,4 +3,4 @@
 build
 dist
 upseto.egg-info
-.coverage
+.coverage*

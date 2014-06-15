@@ -6,27 +6,27 @@ import logging
 import os
 
 
-class SubmitBuild:
-    def __init__(self):
+class Submit:
+    def __init__(self, product, directory):
+        self._product = product
+        self._directory = directory
         git = gitwrapper.GitWrapper(os.getcwd())
         self._basename = git.originURLBasename()
         self._state = "officialcandidate" if config.OFFICIAL_BUILD else "cleancandidate"
-        self._product = "build"
         self._label = label.label(
-            basename=self._basename, product="build", hash=git.hash(), state=self._state)
+            basename=self._basename, product=self._product, hash=git.hash(), state=self._state)
         run.run([
             "python", "-m", "upseto.main", "checkRequirements",
             "--allowNoManifest", "--unsullied", "--gitClean"])
 
     def go(self):
         run.run([
-            "osmosis", "checkin", "..", self._label,
+            "osmosis", "checkin", self._directory, self._label,
             "--MD5",
-            "--serverTCPPort=%d" % config.localOsmosisPort(),
-            "--serverHostname=" + config.localOsmosisHostname()])
-        run.run([
-            "osmosis", "checkin", "..", self._label,
-            "--MD5",
-            "--serverTCPPort=%d" % config.officialOsmosisPort(),
-            "--serverHostname=" + config.officialOsmosisHostname()])
+            "--objectStores=" + config.LOCAL_OSMOSIS])
+        if config.WITH_OFFICIAL_OBJECT_STORE:
+            run.run([
+                "osmosis", "checkin", self._directory, self._label,
+                "--MD5",
+                "--objectStores=" + config.OFFICIAL_OSMOSIS])
         logging.info("Submitted as '%(label)s'", dict(label=self._label))

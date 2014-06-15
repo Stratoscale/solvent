@@ -216,9 +216,63 @@ class Test(unittest.TestCase):
         localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
         solventwrapper.runShouldFail(localRequiringProject, "fulfillrequirements", "official")
 
-# submit dirty -> publish
-# more than one requirement with osmosis join
-# missing official
+    def createBuildProduct(self):
+        self.producer = gitwrapper.GitHub("producer")
+        localProducer = gitwrapper.LocalClone(self.producer)
+        localProducer.writeFile("build/theDirectory/theProduct", "the contents")
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localProducer, "submitproduct theProductName build")
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__theProductName__%s__officialcandidate' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+        solventwrapper.run(localProducer, "approve --product=theProductName")
+        return localProducer
+
+    def test_createBuildProduct(self):
+        self.createBuildProduct()
+
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+
+        self.cleanLocalClonesDir()
+        solventwrapper.run(
+            gitwrapper.localClonesDir(),
+            "bring --repository=producer --product=theProductName --hash=%s --destination=%s" % (
+                self.producer.hash(), gitwrapper.localClonesDir()))
+        self.assertTrue(os.path.isdir(os.path.join(gitwrapper.localClonesDir(), "theDirectory")))
+        self.assertTrue(os.path.exists(
+            os.path.join(gitwrapper.localClonesDir(), "theDirectory", "theProduct")))
+
+    def test_fulfillRequirementsLabelDoesNotExistInLocalOsmosis(self):
+        localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        localClone1.writeFile("build/product1", "product1 contents")
+        solventwrapper.upseto(localRequiringProject, "fulfillRequirements")
+        localRequiringProject.writeFile("build/product2", "product2 contents")
+
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localRequiringProject, "submitbuild")
+        solventwrapper.run(localRequiringProject, "approve")
+        solventwrapper.configureAsNonOfficial()
+
+        labels = self.osmosisPair.local.client().listLabels()
+        self.assertEquals(len(labels), 1)
+        self.osmosisPair.local.client().eraseLabel(labels[0])
+
+        self.cleanLocalClonesDir()
+        localRecursiveProject = gitwrapper.LocalClone(self.recursiveProject)
+        solventwrapper.run(localRecursiveProject, "fulfillrequirements")
+
+        self.assertTrue(localClone1.fileExists("build/product1"))
+        self.assertTrue(localRequiringProject.fileExists("build/product2"))
+
+# no official osmosis
+# submit dirty -> publish -> cheat
+# do it locally, do it with official store
+# missing official, accept clean
 # indirect deep dep joined
 # remove unosmosed files
 

@@ -25,10 +25,12 @@ def configureAsNonOfficial():
 
 
 def run(where, arguments):
+    if not isinstance(where, str):
+        where = where.directory()
     try:
         output = subprocess.check_output(
             "coverage run --parallel-mode -m solvent.main " + _config() + arguments,
-            cwd=where.directory(), shell=True, stderr=subprocess.STDOUT, close_fds=True)
+            cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True)
     except subprocess.CalledProcessError as e:
         print e.output
         raise
@@ -36,9 +38,11 @@ def run(where, arguments):
 
 
 def upseto(where, arguments):
+    if not isinstance(where, str):
+        where = where.directory()
     try:
         output = subprocess.check_output(
-            "python -m upseto.main " + arguments, cwd=where.directory(),
+            "python -m upseto.main " + arguments, cwd=where,
             shell=True, stderr=subprocess.STDOUT, close_fds=True)
     except subprocess.CalledProcessError as e:
         print e.output
@@ -47,10 +51,12 @@ def upseto(where, arguments):
 
 
 def runShouldFail(where, arguments, partOfErrorMessage):
+    if not isinstance(where, str):
+        where = where.directory()
     try:
         output = subprocess.check_output(
             "coverage run --parallel-mode -m solvent.main " + _config() + arguments,
-            cwd=where.directory(), shell=True, stderr=subprocess.STDOUT, close_fds=True)
+            cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True)
     except subprocess.CalledProcessError as e:
         if partOfErrorMessage in e.output.lower():
             return
@@ -64,6 +70,8 @@ def runShouldFail(where, arguments, partOfErrorMessage):
 
 
 def runWhatever(where, commandLine):
+    if not isinstance(where, str):
+        where = where.directory()
     try:
         output = subprocess.check_output(
             commandLine,

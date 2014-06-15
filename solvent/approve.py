@@ -13,18 +13,18 @@ class Approve:
         self._basename = git.originURLBasename()
         self._fromState = "officialcandidate" if config.OFFICIAL_BUILD else "cleancandidate"
         self._toState = "official" if config.OFFICIAL_BUILD else "clean"
+        hash = git.hash()
         self._fromLabel = label.label(
-            basename=self._basename, product=product, hash=git.hash(), state=self._fromState)
+            basename=self._basename, product=product, hash=hash, state=self._fromState)
         self._toLabel = label.label(
-            basename=self._basename, product=product, hash=git.hash(), state=self._toState)
+            basename=self._basename, product=product, hash=hash, state=self._toState)
 
     def go(self):
         run.run([
             "osmosis", "renamelabel", self._fromLabel, self._toLabel,
-            "--serverTCPPort=%d" % config.localOsmosisPort(),
-            "--serverHostname=" + config.localOsmosisHostname()])
-        run.run([
-            "osmosis", "renamelabel", self._fromLabel, self._toLabel,
-            "--serverTCPPort=%d" % config.officialOsmosisPort(),
-            "--serverHostname=" + config.officialOsmosisHostname()])
+            "--objectStores=" + config.LOCAL_OSMOSIS])
+        if config.WITH_OFFICIAL_OBJECT_STORE:
+            run.run([
+                "osmosis", "renamelabel", self._fromLabel, self._toLabel,
+                "--objectStores=" + config.OFFICIAL_OSMOSIS])
         logging.info("Approved as '%(label)s'", dict(label=self._toLabel))

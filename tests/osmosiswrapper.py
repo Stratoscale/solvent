@@ -64,6 +64,9 @@ class Client:
     def checkout(self, path, label):
         return self._run("checkout", path, label)
 
+    def eraseLabel(self, label):
+        return self._run("eraselabel", label)
+
     def listLabels(self, regex=None):
         args = []
         if regex is not None:
@@ -77,7 +80,7 @@ class Client:
     def _run(self, *args):
         try:
             return subprocess.check_output(
-                ["osmosis", "--serverTCPPort=%d" % self._server.port()] + list(args),
+                ["osmosis", "--objectStores=127.0.0.1:%d" % self._server.port()] + list(args),
                 close_fds=True, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             logging.exception("\n\n\nClientOutput:\n" + e.output)
