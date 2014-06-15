@@ -12,9 +12,12 @@ def load(filename):
     if data is None:
         raise Exception("Configuration file must not be empty")
     globals().update(data)
-    if OFFICIAL_OSMOSIS is None:
+    if WITH_OFFICIAL_OBJECT_STORE and OFFICIAL_OSMOSIS is None:
         raise Exception("Configuration file must contain 'OFFICIAL_OSMOSIS' field")
 
 
 def objectStoresOsmosisParameter():
-    return LOCAL_OSMOSIS + "+" + OFFICIAL_OSMOSIS
+    if WITH_OFFICIAL_OBJECT_STORE:
+        return LOCAL_OSMOSIS + "+" + OFFICIAL_OSMOSIS
+    else:
+        return LOCAL_OSMOSIS

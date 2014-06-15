@@ -24,6 +24,11 @@ def configureAsNonOfficial():
             f.write(line + "\n")
 
 
+def configureNoOfficial():
+    with open(configurationFile, "w") as f:
+        f.write("WITH_OFFICIAL_OBJECT_STORE: No\n")
+
+
 def run(where, arguments):
     if not isinstance(where, str):
         where = where.directory()

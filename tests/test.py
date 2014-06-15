@@ -269,6 +269,25 @@ class Test(unittest.TestCase):
         self.assertTrue(localClone1.fileExists("build/product1"))
         self.assertTrue(localRequiringProject.fileExists("build/product2"))
 
+    def test_noOfficialBuildConfigured(self):
+        localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        localClone1.writeFile("build/product1", "product1 contents")
+        solventwrapper.upseto(localRequiringProject, "fulfillRequirements")
+        localRequiringProject.writeFile("build/product2", "product2 contents")
+
+        solventwrapper.configureNoOfficial()
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localRequiringProject, "submitbuild")
+        solventwrapper.run(localRequiringProject, "approve")
+
+        self.cleanLocalClonesDir()
+        localRecursiveProject = gitwrapper.LocalClone(self.recursiveProject)
+        solventwrapper.run(localRecursiveProject, "fulfillrequirements")
+
+        self.assertTrue(localClone1.fileExists("build/product1"))
+        self.assertTrue(localRequiringProject.fileExists("build/product2"))
+
 # no official osmosis
 # submit dirty -> publish -> cheat
 # do it locally, do it with official store
