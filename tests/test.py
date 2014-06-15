@@ -288,6 +288,56 @@ class Test(unittest.TestCase):
         self.assertTrue(localClone1.fileExists("build/product1"))
         self.assertTrue(localRequiringProject.fileExists("build/product2"))
 
+    def test_createBuildProduct_bringExactVersionFromManifestFile(self):
+        self.createBuildProduct()
+        self.cleanLocalClonesDir()
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        solventwrapper.run(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()))
+
+        solventwrapper.run(
+            localClone1, "bring --repository=producer --product=theProductName --destination=%s" % (
+                os.path.join(localClone1.directory(), "build", "theProductDir")))
+        self.assertTrue(os.path.isdir(os.path.join(
+            localClone1.directory(), "build", "theProductDir", "theDirectory")))
+        self.assertTrue(os.path.exists(os.path.join(
+            localClone1.directory(), "build", "theProductDir", "theDirectory", "theProduct")))
+
+    def test_invalidInputForAddRequirementCommandLine(self):
+        self.createBuildProduct()
+        self.cleanLocalClonesDir()
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        solventwrapper.runShouldFail(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            "thisisnotagiturl", self.producer.hash()), "invalid")
+        solventwrapper.runShouldFail(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()[: -2]), "invalid")
+        solventwrapper.runShouldFail(
+            localClone1, "bring --repository=producer --product=theProductName --destination=%s" % (
+                os.path.join(localClone1.directory(), "build", "theProductDir")), "requirement")
+
+    def test_updateRequirement(self):
+        self.createBuildProduct()
+        self.cleanLocalClonesDir()
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        self.assertNotEquals(self.producer.hash()[-2:], "00")
+        solventwrapper.run(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()[: -2] + "00"))
+        previous = localClone1.readFile("solvent.manifest")
+        solventwrapper.run(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()))
+        self.assertEquals(len(localClone1.readFile("solvent.manifest")), len(previous))
+
+        solventwrapper.run(
+            localClone1, "bring --repository=producer --product=theProductName --destination=%s" % (
+                os.path.join(localClone1.directory(), "build", "theProductDir")))
+
+        solventwrapper.run(
+            localClone1, "removerequirement --originURLBasename=producer")
+        solventwrapper.runShouldFail(
+            localClone1, "bring --repository=producer --product=theProductName --destination=%s" % (
+                os.path.join(localClone1.directory(), "build", "theProductDir")), "requirement")
+
+
 # submit dirty -> publish -> cheat
 # missing official, accept clean
 # indirect deep dep joined

@@ -65,6 +65,10 @@ class GitWrapper:
         with open(path, "w") as f:
             f.write(content)
 
+    def readFile(self, relativePath):
+        with open(os.path.join(self.directory(), relativePath)) as f:
+            return f.read()
+
     def fileExists(self, relativePath):
         path = os.path.join(self.directory(), relativePath)
         return os.path.exists(path)
@@ -89,6 +93,9 @@ class GitHub(GitWrapper):
         with open(os.path.join(self.directory(), filename), "w") as f:
             f.write(content)
 
+    def url(self):
+        return "file://" + self.directory()
+
 
 class LocalClone(GitWrapper):
     def __init__(self, gitHub):
@@ -97,7 +104,7 @@ class LocalClone(GitWrapper):
             localClonesDir(), os.path.basename(gitHub.directory()))
         if not os.path.isdir(localClonesDir()):
             os.makedirs(localClonesDir())
-        _run("git clone file://%s" % gitHub.directory(), cwd=localClonesDir())
+        _run("git clone %s" % gitHub.url(), cwd=localClonesDir())
         GitWrapper.__init__(self, directory)
         self.run("git checkout master")
 
