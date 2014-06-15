@@ -1,4 +1,5 @@
 import subprocess
+import os
 
 
 configurationFile = None
@@ -29,13 +30,15 @@ def configureNoOfficial():
         f.write("WITH_OFFICIAL_OBJECT_STORE: No\n")
 
 
-def run(where, arguments):
+def run(where, arguments, env=dict()):
+    environment = dict(os.environ)
+    environment.update(env)
     if not isinstance(where, str):
         where = where.directory()
     try:
         output = subprocess.check_output(
             "coverage run --parallel-mode -m solvent.main " + _config() + arguments,
-            cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True)
+            cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True, env=environment)
     except subprocess.CalledProcessError as e:
         print e.output
         raise

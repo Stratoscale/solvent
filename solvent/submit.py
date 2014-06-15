@@ -12,12 +12,18 @@ class Submit:
         self._directory = directory
         git = gitwrapper.GitWrapper(os.getcwd())
         self._basename = git.originURLBasename()
-        self._state = "officialcandidate" if config.OFFICIAL_BUILD else "cleancandidate"
+        if config.DIRTY_SUBMISSION:
+            self._state = 'dirty'
+        elif config.OFFICIAL_BUILD:
+            self._state = 'officialcandidate'
+        else:
+            self._state = 'cleancandidate'
         self._label = label.label(
             basename=self._basename, product=self._product, hash=git.hash(), state=self._state)
-        run.run([
-            "python", "-m", "upseto.main", "checkRequirements",
-            "--allowNoManifest", "--unsullied", "--gitClean"])
+        if not config.DIRTY_SUBMISSION:
+            run.run([
+                "python", "-m", "upseto.main", "checkRequirements",
+                "--allowNoManifest", "--unsullied", "--gitClean"])
 
     def go(self):
         run.run([

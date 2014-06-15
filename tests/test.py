@@ -337,8 +337,33 @@ class Test(unittest.TestCase):
             localClone1, "bring --repository=producer --product=theProductName --destination=%s" % (
                 os.path.join(localClone1.directory(), "build", "theProductDir")), "requirement")
 
+    def test_workDirty(self):
+        self.producer = gitwrapper.GitHub("producer")
+        localProducer = gitwrapper.LocalClone(self.producer)
+        localProducer.writeFile("build/theDirectory/theProduct", "the contents")
+        localProducer.writeFile("imaketheprojectdirty", "dirty dirty boy")
+        localProducer.writeFile("../isullytheworkspace", "and my pants too")
+        solventwrapper.runShouldFail(localProducer, "submitproduct theProductName build", "sullied")
+        solventwrapper.run(
+            localProducer, "submitproduct theProductName build",
+            env=dict(SOLVENT_CONFIG="DIRTY_SUBMISSION: Yes"))
 
-# submit dirty -> publish -> cheat
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__theProductName__%s__dirty' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+
+        solventwrapper.runWhatever(
+            localProducer.directory(),
+            "coverage run --parallel-mode -m solvent.cheating --configurationFile=%s "
+            "changestate --fromState=dirty --toState=official --product=theProductName" %
+            solventwrapper.configurationFile)
+
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+
 # missing official, accept clean
 # indirect deep dep joined
 # remove unosmosed files

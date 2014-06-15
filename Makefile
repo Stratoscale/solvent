@@ -15,7 +15,7 @@ check_convention:
 	pep8 . --max-line-length=109
 
 uninstall:
-	sudo pip uninstall solvent
+	-yes | sudo pip uninstall solvent
 	sudo rm /usr/bin/solvent
 
 install:
