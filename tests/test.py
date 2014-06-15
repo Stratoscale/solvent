@@ -288,9 +288,7 @@ class Test(unittest.TestCase):
         self.assertTrue(localClone1.fileExists("build/product1"))
         self.assertTrue(localRequiringProject.fileExists("build/product2"))
 
-# no official osmosis
 # submit dirty -> publish -> cheat
-# do it locally, do it with official store
 # missing official, accept clean
 # indirect deep dep joined
 # remove unosmosed files
