@@ -9,7 +9,7 @@ setup(
     name="solvent",
     version="1.0",
     author="Shlomo Matichin",
-    author_email="shlomomatichin@gmail.com",
+    author_email="shlomi@stratoscale.com",
     description=(
         "Manage official build product flow, using osmosis as a transport"),
     keywords="git repos repositories scm buildproducts build products",
@@ -19,5 +19,8 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Topic :: Utilities",
+    ],
+    install_requires=[
+        "upseto",
     ],
 )
