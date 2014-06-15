@@ -18,7 +18,7 @@ class Manifest:
             f.write(yaml.dump(self._data, default_flow_style=False))
 
     def addRequirement(self, originURL, hash):
-        GIT_URL = r'((file|git|ssh|http(s)?)|(git@[\w.]+))(:(//)?)([\w.@\:/-~]+)(.git)(/)?'
+        GIT_URL = r'((file|git|ssh|http(s)?)|(git@[\w.]+))(:(//)?)([\w.@\:/-~]+)'
         if re.match(GIT_URL, originURL) is None:
             raise Exception("'%s' is in invalid format for a git repo" % originURL)
         if len(hash.decode('hex')) != 20:
