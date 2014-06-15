@@ -2,5 +2,5 @@
 *.swp
 build
 dist
-upseto.egg-info
+solvent.egg-info
 .coverage*
