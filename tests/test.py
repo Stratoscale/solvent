@@ -364,6 +364,12 @@ class Test(unittest.TestCase):
         self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
         self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
 
+    def test_FetchObjectStoresConfiguration(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        output = solventwrapper.run(localClone1, "printobjectstores").strip()
+        self.assertEquals(output, "localhost:%d+localhost:%d" % (
+            self.osmosisPair.local.port(), self.osmosisPair.official.port()))
+
 # missing official, accept clean
 # indirect deep dep joined
 # remove unosmosed files

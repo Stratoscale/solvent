@@ -52,6 +52,10 @@ fullfillRequirementsCmd = subparsers.add_parser(
 parser.add_argument(
     "--configurationFile", default="/etc/solvent.conf",
     help="override configuration file location")
+subparsers.add_parser(
+    "printobjectstores",
+    help="print the current configuration in an osmosis --objectStores= "
+    "format")
 args = parser.parse_args()
 
 config.load(args.configurationFile)
@@ -75,5 +79,7 @@ elif args.cmd == "removerequirement":
     mani = manifest.Manifest.fromLocalDir()
     mani.delRequirementByBasename(basename=args.originURLBasename)
     mani.save()
+elif args.cmd == "printobjectstores":
+    print config.objectStoresOsmosisParameter()
 else:
     raise AssertionError("No such command")

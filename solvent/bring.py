@@ -25,7 +25,7 @@ class Bring:
             os.makedirs(self._destination)
         run.run([
             "osmosis", "checkout", self._destination, label,
-            "--MD5", "--removeUnknownFiles",
+            "--MD5", "--removeUnknownFiles", "--putIfMissing",
             "--objectStores=" + config.objectStoresOsmosisParameter()])
 
     def _hashFromRequirement(self, repositoryBasename):

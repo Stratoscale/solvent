@@ -27,5 +27,5 @@ class FulfillRequirements:
         logging.info("Checking out '%(labels)s'", dict(labels=matching))
         run.run([
             "osmosis", "checkout", "..", "+".join(matching),
-            "--MD5",
+            "--MD5", "--putIfMissing",
             "--objectStores=" + config.objectStoresOsmosisParameter()])
