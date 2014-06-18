@@ -1,7 +1,6 @@
 from solvent import config
 from solvent import run
 from solvent import requirementlabel
-from solvent import manifest
 import logging
 import os
 
@@ -10,10 +9,7 @@ class Bring:
     def __init__(self, repositoryBasename, product, hash, destination):
         self._repositoryBasename = repositoryBasename
         self._product = product
-        if hash is None:
-            self._hash = self._hashFromRequirement(repositoryBasename)
-        else:
-            self._hash = hash
+        self._hash = hash
         self._destination = destination
 
     def go(self):
@@ -27,7 +23,3 @@ class Bring:
             "osmosis", "checkout", self._destination, label,
             "--MD5", "--removeUnknownFiles", "--putIfMissing",
             "--objectStores=" + config.objectStoresOsmosisParameter()])
-
-    def _hashFromRequirement(self, repositoryBasename):
-        mani = manifest.Manifest.fromLocalDir()
-        return mani.findRequirementByBasename(repositoryBasename)['hash']

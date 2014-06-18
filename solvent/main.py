@@ -5,6 +5,7 @@ from solvent import bring
 from solvent import config
 from solvent import fulfillrequirements
 from solvent import manifest
+from solvent import requirementlabel
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -56,6 +57,11 @@ subparsers.add_parser(
     "printobjectstores",
     help="print the current configuration in an osmosis --objectStores= "
     "format")
+printLabelCmd = subparsers.add_parser(
+    "printlabel",
+    help="print the current label of a dependency")
+printLabelCmd.add_argument("--product", required=True)
+printLabelCmd.add_argument("--repositoryBasename", required=True)
 args = parser.parse_args()
 
 config.load(args.configurationFile)
@@ -81,5 +87,9 @@ elif args.cmd == "removerequirement":
     mani.save()
 elif args.cmd == "printobjectstores":
     print config.objectStoresOsmosisParameter()
+elif args.cmd == "printlabel":
+    label = requirementlabel.RequirementLabel(
+        basename=args.repositoryBasename, product=args.product, hash=None)
+    print label.matching()
 else:
     raise AssertionError("No such command")

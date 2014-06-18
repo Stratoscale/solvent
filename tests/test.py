@@ -370,6 +370,17 @@ class Test(unittest.TestCase):
         self.assertEquals(output, "localhost:%d+localhost:%d" % (
             self.osmosisPair.local.port(), self.osmosisPair.official.port()))
 
+    def test_PrintDependantLabel(self):
+        self.createBuildProduct()
+        self.cleanLocalClonesDir()
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        solventwrapper.run(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()))
+        expectedLabel = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        label = solventwrapper.run(
+            localClone1, "printlabel --repositoryBasename=producer --product=theProductName").strip()
+        self.assertEquals(label, expectedLabel)
+
 # missing official, accept clean
 # indirect deep dep joined
 # remove unosmosed files
