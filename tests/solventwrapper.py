@@ -26,7 +26,7 @@ def configureAsNonOfficial():
 
 
 def configureNoOfficial():
-    with open(configurationFile, "w") as f:
+    with open(configurationFile, "a") as f:
         f.write("WITH_OFFICIAL_OBJECT_STORE: No\n")
 
 
