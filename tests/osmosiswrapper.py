@@ -77,6 +77,9 @@ class Client:
             labels.remove("")
         return labels
 
+    def renameLabel(self, fromLabel, toLabel):
+        return self._run("renamelabel", fromLabel, toLabel)
+
     def _run(self, *args):
         try:
             return subprocess.check_output(

@@ -346,7 +346,7 @@ class Test(unittest.TestCase):
         solventwrapper.runShouldFail(localProducer, "submitproduct theProductName build", "sullied")
         solventwrapper.run(
             localProducer, "submitproduct theProductName build",
-            env=dict(SOLVENT_CONFIG="DIRTY_SUBMISSION: Yes"))
+            env=dict(SOLVENT_DIRTY="Yes"))
 
         self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
         label = 'solvent__producer__theProductName__%s__dirty' % self.producer.hash()
@@ -381,7 +381,90 @@ class Test(unittest.TestCase):
             localClone1, "printlabel --repositoryBasename=producer --product=theProductName").strip()
         self.assertEquals(label, expectedLabel)
 
-# missing official, accept clean
+    def createAllStates(self):
+        localProducer = self.createBuildProduct()
+        solventwrapper.configureAsNonOfficial()
+        solventwrapper.run(localProducer, "submitproduct theProductName build")
+        solventwrapper.run(localProducer, "approve --product=theProductName")
+        solventwrapper.run(
+            localProducer, "submitproduct theProductName build", env=dict(SOLVENT_DIRTY="Yes"))
+
+        self.cleanLocalClonesDir()
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        solventwrapper.run(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()))
+        officialLabel = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        cleanLabel = 'solvent__producer__theProductName__%s__clean' % self.producer.hash()
+        dirtyLabel = 'solvent__producer__theProductName__%s__dirty' % self.producer.hash()
+
+        getLabel = lambda: solventwrapper.run(
+            localClone1, "printlabel --repositoryBasename=producer --product=theProductName").strip()
+        getDirtyLabel = lambda: solventwrapper.run(
+            localClone1, "printlabel --repositoryBasename=producer --product=theProductName",
+            env=dict(SOLVENT_DIRTY="Yes")).strip()
+        noLabel = lambda: solventwrapper.runShouldFail(
+            localClone1, "printlabel --repositoryBasename=producer --product=theProductName", "requirement")
+        return dict(
+            getLabel=getLabel, noLabel=noLabel, getDirtyLabel=getDirtyLabel,
+            localClone1=localClone1, officialLabel=officialLabel,
+            cleanLabel=cleanLabel, dirtyLabel=dirtyLabel)
+
+    def test_priorityBetweenStates_OfficialBuild(self):
+        created = self.createAllStates()
+        solventwrapper.configureAsOfficial()
+        self.assertEquals(created['getLabel'](), created['officialLabel'])
+        self.osmosisPair.local.client().eraseLabel(created['officialLabel'])
+        self.assertEquals(created['getLabel'](), created['officialLabel'])
+        self.osmosisPair.official.client().eraseLabel(created['officialLabel'])
+        created['noLabel']()
+
+    def test_priorityBetweenStates_CleanBuild(self):
+        created = self.createAllStates()
+        solventwrapper.configureAsNonOfficial()
+        self.assertEquals(created['getLabel'](), created['officialLabel'])
+        self.osmosisPair.local.client().eraseLabel(created['officialLabel'])
+        self.assertEquals(created['getLabel'](), created['cleanLabel'])
+        self.osmosisPair.local.client().eraseLabel(created['cleanLabel'])
+        self.assertEquals(created['getLabel'](), created['officialLabel'])
+        self.osmosisPair.official.client().eraseLabel(created['officialLabel'])
+        self.assertEquals(created['getLabel'](), created['cleanLabel'])
+        self.osmosisPair.official.client().eraseLabel(created['cleanLabel'])
+        created['noLabel']()
+
+    def test_priorityBetweenStates_DirtyBuild(self):
+        created = self.createAllStates()
+        solventwrapper.configureAsNonOfficial()
+        self.assertEquals(created['getDirtyLabel'](), created['officialLabel'])
+        self.osmosisPair.local.client().eraseLabel(created['officialLabel'])
+        self.assertEquals(created['getDirtyLabel'](), created['cleanLabel'])
+        self.osmosisPair.local.client().eraseLabel(created['cleanLabel'])
+        self.assertEquals(created['getDirtyLabel'](), created['dirtyLabel'])
+        self.osmosisPair.local.client().eraseLabel(created['dirtyLabel'])
+        self.assertEquals(created['getDirtyLabel'](), created['officialLabel'])
+        self.osmosisPair.official.client().eraseLabel(created['officialLabel'])
+        self.assertEquals(created['getDirtyLabel'](), created['cleanLabel'])
+        self.osmosisPair.official.client().eraseLabel(created['cleanLabel'])
+        self.assertEquals(created['getDirtyLabel'](), created['dirtyLabel'])
+        self.osmosisPair.official.client().eraseLabel(created['dirtyLabel'])
+        created['noLabel']()
+
+    def test_solventCanBeConfiguredFromTheEnvironment(self):
+        self.producer = gitwrapper.GitHub("producer")
+        localProducer = gitwrapper.LocalClone(self.producer)
+        localProducer.writeFile("build/theDirectory/theProduct", "the contents")
+        localProducer.writeFile("imaketheprojectdirty", "dirty dirty boy")
+        localProducer.writeFile("../isullytheworkspace", "and my pants too")
+        solventwrapper.runShouldFail(localProducer, "submitproduct theProductName build", "sullied")
+        solventwrapper.run(
+            localProducer, "submitproduct theProductName build",
+            env=dict(SOLVENT_CONFIG='DIRTY: Yes'))
+
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__theProductName__%s__dirty' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+
+
 # indirect deep dep joined
 # remove unosmosed files
 
