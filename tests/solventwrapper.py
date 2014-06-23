@@ -58,13 +58,15 @@ def upseto(where, arguments):
     return output
 
 
-def runShouldFail(where, arguments, partOfErrorMessage):
+def runShouldFail(where, arguments, partOfErrorMessage, env=dict()):
+    environment = dict(os.environ)
+    environment.update(env)
     if not isinstance(where, str):
         where = where.directory()
     try:
         output = subprocess.check_output(
             "coverage run --parallel-mode -m solvent.main " + _config() + arguments,
-            cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True)
+            cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True, env=environment)
     except subprocess.CalledProcessError as e:
         if partOfErrorMessage in e.output.lower():
             return

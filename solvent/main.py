@@ -2,6 +2,7 @@ import argparse
 from solvent import submit
 from solvent import approve
 from solvent import bring
+from solvent import localize
 from solvent import config
 from solvent import fulfillrequirements
 from solvent import manifest
@@ -38,6 +39,10 @@ bringCmd.add_argument(
     "dependency if it's not updated in the manifest)")
 bringCmd.add_argument(
     "--destination", required=True, help="destination directory")
+localizeCmd = subparsers.add_parser(
+    "localize", help="make sure a specific label exists in local osmosis object "
+    "store, or fetch it from the official server (useful for rackattack-virtual)")
+localizeCmd.add_argument("--label", required=True)
 addRequirementCmd = subparsers.add_parser(
     "addrequirement",
     help="add dependency on build products (not an upseto dependency)")
@@ -75,6 +80,9 @@ elif args.cmd == "bring":
     bring.Bring(
         product=args.product, repositoryBasename=args.repositoryBasename,
         hash=args.hash, destination=args.destination).go()
+elif args.cmd == "localize":
+    localize.Localize(
+        label=args.label).go()
 elif args.cmd == "fulfillrequirements":
     fulfillrequirements.FulfillRequirements().go()
 elif args.cmd == "addrequirement":

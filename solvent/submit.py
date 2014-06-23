@@ -26,11 +26,13 @@ class Submit:
                 "--allowNoManifest", "--unsullied", "--gitClean"])
 
     def go(self):
+        logging.info("Submitting locally as '%(label)s'", dict(label=self._label))
         run.run([
             "osmosis", "checkin", self._directory, self._label,
             "--MD5",
             "--objectStores=" + config.LOCAL_OSMOSIS])
         if config.WITH_OFFICIAL_OBJECT_STORE:
+            logging.info("Submitting to official store as '%(label)s'", dict(label=self._label))
             run.run([
                 "osmosis", "checkin", self._directory, self._label,
                 "--MD5",

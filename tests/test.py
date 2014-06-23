@@ -464,6 +464,26 @@ class Test(unittest.TestCase):
         self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
         self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
 
+    def test_localize(self):
+        self.createBuildProduct()
+
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+
+        self.osmosisPair.local.client().eraseLabel(label)
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [])
+        solventwrapper.run(os.getcwd(), "localize --label=%s" % label)
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+
+        solventwrapper.run(os.getcwd(), "localize --label=%s" % label)
+
+        self.osmosisPair.local.client().eraseLabel(label)
+        solventwrapper.runShouldFail(
+            os.getcwd(), "localize --label=%s" % label, "official",
+            env=dict(SOLVENT_CONFIG="WITH_OFFICIAL_OBJECT_STORE: No"))
+
 
 # indirect deep dep joined
 # remove unosmosed files
