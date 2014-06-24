@@ -20,7 +20,7 @@ class RequirementLabel:
         if not config.OFFICIAL_BUILD:
             if self._clean() in labelsInLocal:
                 return self._clean()
-            if config.DIRTY:
+            if not config.CLEAN:
                 if self._dirty() in labelsInLocal:
                     return self._dirty()
         if config.WITH_OFFICIAL_OBJECT_STORE:
@@ -30,7 +30,7 @@ class RequirementLabel:
             if not config.OFFICIAL_BUILD:
                 if self._clean() in labelsInOfficial:
                     return self._clean()
-                if config.DIRTY:
+                if not config.CLEAN:
                     if self._dirty() in labelsInOfficial:
                         return self._dirty()
         raise Exception("No official build for '%s' product '%s' (%s)" % (

@@ -5,7 +5,7 @@ LOCAL_OSMOSIS = 'localhost:1010'
 OFFICIAL_OSMOSIS = None
 OFFICIAL_BUILD = False
 WITH_OFFICIAL_OBJECT_STORE = True
-DIRTY = False
+CLEAN = False
 
 
 def load(filename):
@@ -17,9 +17,9 @@ def load(filename):
     if 'SOLVENT_CONFIG' in os.environ:
         data = yaml.load(os.environ['SOLVENT_CONFIG'])
         globals().update(data)
-    if 'SOLVENT_DIRTY' in os.environ:
-        global DIRTY
-        DIRTY = True
+    if 'SOLVENT_CLEAN' in os.environ:
+        global CLEAN
+        CLEAN = True
     if WITH_OFFICIAL_OBJECT_STORE and OFFICIAL_OSMOSIS is None:
         raise Exception("Configuration file must contain 'OFFICIAL_OSMOSIS' field")
 

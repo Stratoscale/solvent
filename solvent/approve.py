@@ -11,8 +11,14 @@ class Approve:
         self._product = product
         git = gitwrapper.GitWrapper(os.getcwd())
         self._basename = git.originURLBasename()
-        self._fromState = "officialcandidate" if config.OFFICIAL_BUILD else "cleancandidate"
-        self._toState = "official" if config.OFFICIAL_BUILD else "clean"
+        if config.OFFICIAL_BUILD:
+            self._fromState = "officialcandidate"
+            self._toState = "official"
+        elif config.CLEAN:
+            self._fromState = "cleancandidate"
+            self._toState = "clean"
+        else:
+            raise AssertionError("Must be a clean or official build to use approve")
         hash = git.hash()
         self._fromLabel = label.label(
             basename=self._basename, product=product, hash=hash, state=self._fromState)
