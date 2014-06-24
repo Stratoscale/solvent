@@ -39,6 +39,11 @@ bringCmd.add_argument(
     "dependency if it's not updated in the manifest)")
 bringCmd.add_argument(
     "--destination", required=True, help="destination directory")
+bringlabelCmd = subparsers.add_parser(
+    "bringlabel", help="checkout specific label")
+bringlabelCmd.add_argument("--label", required=True)
+bringlabelCmd.add_argument(
+    "--destination", required=True, help="destination directory")
 localizeCmd = subparsers.add_parser(
     "localize", help="make sure a specific label exists in local osmosis object "
     "store, or fetch it from the official server (useful for rackattack-virtual)")
@@ -80,6 +85,8 @@ elif args.cmd == "bring":
     bring.Bring(
         product=args.product, repositoryBasename=args.repositoryBasename,
         hash=args.hash, destination=args.destination).go()
+elif args.cmd == "bringlabel":
+    bring.Bring.label(args.label, args.destination)
 elif args.cmd == "localize":
     localize.Localize(
         label=args.label).go()

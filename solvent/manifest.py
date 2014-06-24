@@ -13,6 +13,9 @@ class Manifest:
         self._data = data
         self._assertValid()
 
+    def requirements(self):
+        return self._data['requirements'] # pragma: no cover
+
     def save(self):
         with open(self._FILENAME, "w") as f:
             f.write(yaml.dump(self._data, default_flow_style=False))
@@ -48,26 +51,26 @@ class Manifest:
             requirements.add(requirement['originURL'])
 
     @classmethod
-    def _fromDir(cls, directory):
+    def fromDir(cls, directory):
         filename = os.path.join(directory, cls._FILENAME)
         with open(filename) as f:
             data = yaml.load(f.read())
         return cls(data)
 
     @classmethod
-    def _fromDirOrNew(cls, directory):
+    def fromDirOrNew(cls, directory):
         if cls._exists(directory):
-            return cls._fromDir(directory)
+            return cls.fromDir(directory)
         else:
             return cls(dict(requirements=[]))
 
     @classmethod
     def fromLocalDir(cls):
-        return cls._fromDir('.')
+        return cls.fromDir('.')
 
     @classmethod
     def fromLocalDirOrNew(cls):
-        return cls._fromDirOrNew('.')
+        return cls.fromDirOrNew('.')
 
     @classmethod
     def _exists(cls, directory):

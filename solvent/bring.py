@@ -16,10 +16,14 @@ class Bring:
         requirementLabel = requirementlabel.RequirementLabel(
             basename=self._repositoryBasename, product=self._product, hash=self._hash)
         label = requirementLabel.matching()
+        self.label(label=label, destination=self._destination)
+
+    @classmethod
+    def label(cls, label, destination):
         logging.info("Checking out '%(label)s'", dict(label=label))
-        if not os.path.isdir(self._destination):
-            os.makedirs(self._destination)
+        if not os.path.isdir(destination):
+            os.makedirs(destination)
         run.run([
-            "osmosis", "checkout", self._destination, label,
+            "osmosis", "checkout", destination, label,
             "--MD5", "--removeUnknownFiles", "--putIfMissing",
             "--objectStores=" + config.objectStoresOsmosisParameter()])

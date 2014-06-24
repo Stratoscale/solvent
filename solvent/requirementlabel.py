@@ -33,7 +33,7 @@ class RequirementLabel:
                 if not config.CLEAN:
                     if self._dirty() in labelsInOfficial:
                         return self._dirty()
-        raise Exception("No build (in apropriate state) found for '%s' product '%s' (%s)" % (
+        raise Exception("No built label (in apropriate state) found for '%s' product '%s' (%s)" % (
             self._basename, self._product, self._hash))
 
     def _base(self, state):

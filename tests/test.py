@@ -214,7 +214,7 @@ class Test(unittest.TestCase):
 
         self.cleanLocalClonesDir()
         localRequiringProject = gitwrapper.LocalClone(self.requiringProject)
-        solventwrapper.runShouldFail(localRequiringProject, "fulfillrequirements", "official")
+        solventwrapper.runShouldFail(localRequiringProject, "fulfillrequirements", "build")
 
     def createBuildProduct(self):
         self.producer = gitwrapper.GitHub("producer")
@@ -488,6 +488,18 @@ class Test(unittest.TestCase):
         solventwrapper.runShouldFail(
             os.getcwd(), "localize --label=%s" % label, "official",
             env=dict(SOLVENT_CONFIG="WITH_OFFICIAL_OBJECT_STORE: No"))
+
+    def test_createBuildProduct_bringLabel(self):
+        self.createBuildProduct()
+        self.cleanLocalClonesDir()
+        label = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        solventwrapper.run(
+            gitwrapper.localClonesDir(), "bringlabel --label=%s --destination=%s" % (
+                label, gitwrapper.localClonesDir()))
+        self.assertTrue(os.path.isdir(os.path.join(
+            gitwrapper.localClonesDir(), "theDirectory")))
+        self.assertTrue(os.path.exists(os.path.join(
+            gitwrapper.localClonesDir(), "theDirectory", "theProduct")))
 
 
 # indirect deep dep joined
