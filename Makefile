@@ -7,7 +7,9 @@ UNITTESTS=$(shell find tests -name 'test*.py' | sed 's@/@.@g' | sed 's/\(.*\)\.p
 COVERED_FILES=solvent/*.py
 unittest:
 	rm -f .coverage*
-	PYTHONPATH=`pwd`:`pwd`/../upseto COVERAGE_FILE=`pwd`/.coverage coverage run --parallel-mode --append -m unittest $(UNITTESTS)
+	-mkdir build
+	ln -sf `pwd`/../osmosis/build/cpp/osmosis.bin build/osmosis
+	PATH=`pwd`/build:$$PATH PYTHONPATH=`pwd`:`pwd`/../upseto COVERAGE_FILE=`pwd`/.coverage coverage run --parallel-mode --append -m unittest $(UNITTESTS)
 	coverage combine
 	coverage report --show-missing --rcfile=coverage.config --fail-under=100 --include='$(COVERED_FILES)'
 
