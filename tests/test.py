@@ -169,10 +169,20 @@ class Test(unittest.TestCase):
 
         self.cleanLocalClonesDir()
         localRecursiveProject = gitwrapper.LocalClone(self.recursiveProject)
+        solventwrapper.run(localRecursiveProject, "checkrequirements")
         solventwrapper.run(localRecursiveProject, "fulfillrequirements")
 
         self.assertTrue(localClone1.fileExists("build/product1"))
         self.assertTrue(localRequiringProject.fileExists("build/product2"))
+
+        solventwrapper.run(localRecursiveProject, "checkrequirements")
+        labels = self.osmosisPair.local.client().listLabels()
+        self.assertEquals(len(labels), 1)
+        label = labels[0]
+        self.osmosisPair.local.client().eraseLabel(label)
+        solventwrapper.run(localRecursiveProject, "checkrequirements")
+        self.osmosisPair.official.client().eraseLabel(label)
+        solventwrapper.runShouldFail(localRecursiveProject, "checkrequirements", "label")
 
     def test_NoRequirements_FulfillDoesNothing(self):
         localClone1 = gitwrapper.LocalClone(self.project1)
@@ -500,6 +510,18 @@ class Test(unittest.TestCase):
             gitwrapper.localClonesDir(), "theDirectory")))
         self.assertTrue(os.path.exists(os.path.join(
             gitwrapper.localClonesDir(), "theDirectory", "theProduct")))
+
+    def test_checkSolventRequirements_DependsOnSolvent__build__productName(self):
+        self.createBuildProduct()
+        self.cleanLocalClonesDir()
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        solventwrapper.run(localClone1, "addrequirement --originURL=%s --hash=%s" % (
+            self.producer.url(), self.producer.hash()))
+        label = 'solvent__producer__theProductName__%s__official' % self.producer.hash()
+        buildLabel = 'solvent__producer__build__%s__official' % self.producer.hash()
+        solventwrapper.runShouldFail(localClone1, "checkrequirements", "label")
+        self.osmosisPair.local.client().renameLabel(label, buildLabel)
+        solventwrapper.run(localClone1, "checkrequirements")
 
 
 # indirect deep dep joined

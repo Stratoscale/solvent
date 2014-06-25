@@ -5,6 +5,7 @@ from solvent import bring
 from solvent import localize
 from solvent import config
 from solvent import fulfillrequirements
+from solvent import checkrequirements
 from solvent import manifest
 from solvent import requirementlabel
 import logging
@@ -60,6 +61,10 @@ removeRequirementCmd.add_argument("--originURLBasename", required=True)
 fullfillRequirementsCmd = subparsers.add_parser(
     "fulfillrequirements",
     help="fulfill upseto requirements using ready build products")
+checkRequirementsCmd = subparsers.add_parser(
+    "checkrequirements",
+    help="check upseto and solvent requirements labels exist in either local or "
+    "official objects stores")
 parser.add_argument(
     "--configurationFile", default="/etc/solvent.conf",
     help="override configuration file location")
@@ -92,6 +97,8 @@ elif args.cmd == "localize":
         label=args.label).go()
 elif args.cmd == "fulfillrequirements":
     fulfillrequirements.FulfillRequirements().go()
+elif args.cmd == "checkrequirements":
+    checkrequirements.CheckRequirements().go()
 elif args.cmd == "addrequirement":
     mani = manifest.Manifest.fromLocalDirOrNew()
     mani.addRequirement(originURL=args.originURL, hash=args.hash)

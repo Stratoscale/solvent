@@ -14,7 +14,7 @@ class Manifest:
         self._assertValid()
 
     def requirements(self):
-        return self._data['requirements'] # pragma: no cover
+        return self._data['requirements']  # pragma: no cover
 
     def save(self):
         with open(self._FILENAME, "w") as f:
@@ -32,6 +32,7 @@ class Manifest:
                 return
         self._data['requirements'].append(
             dict(originURL=originURL, hash=hash))
+        self._assertValid()
 
     def findRequirementByBasename(self, basename):
         for requirement in self._data['requirements']:
@@ -49,6 +50,7 @@ class Manifest:
                 raise Exception(
                     "'%s' located twice in requirement list" % requirement['originURL'])  # pragma: no cover
             requirements.add(requirement['originURL'])
+# todo: no repeat requirements from upseto
 
     @classmethod
     def fromDir(cls, directory):
