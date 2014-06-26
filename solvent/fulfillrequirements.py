@@ -25,7 +25,9 @@ class FulfillRequirements:
                 basename=basename, product="build", hash=hash)
             matching.append(requirementLabel.matching())
         logging.info("Checking out '%(labels)s'", dict(labels=matching))
-        run.run([
-            "osmosis", "checkout", "..", "+".join(matching),
-            "--MD5", "--putIfMissing",
-            "--objectStores=" + config.objectStoresOsmosisParameter()])
+        for label in matching:
+            logging.info("Checking out '%(label)s'", dict(label=label))
+            run.run([
+                "osmosis", "checkout", "..", label,
+                "--MD5", "--putIfMissing",
+                "--objectStores=" + config.objectStoresOsmosisParameter()])

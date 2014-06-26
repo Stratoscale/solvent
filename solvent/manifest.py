@@ -38,7 +38,7 @@ class Manifest:
         for requirement in self._data['requirements']:
             if gitwrapper.originURLBasename(requirement['originURL']) == basename:
                 return requirement
-        raise Exception("Origin URL with the basename '%s' was not found in requirement list", basename)
+        raise Exception("Origin URL with the basename '%s' was not found in requirement list" % basename)
 
     def delRequirementByBasename(self, basename):
         self._data['requirements'].remove(self.findRequirementByBasename(basename))
