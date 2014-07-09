@@ -8,6 +8,7 @@ from solvent import fulfillrequirements
 from solvent import checkrequirements
 from solvent import manifest
 from solvent import requirementlabel
+from solvent import run
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -52,8 +53,15 @@ localizeCmd.add_argument("--label", required=True)
 addRequirementCmd = subparsers.add_parser(
     "addrequirement",
     help="add dependency on build products (not an upseto dependency)")
-addRequirementCmd.add_argument("--originURL", required=True)
-addRequirementCmd.add_argument("--hash", required=True)
+addRequirementCmdURLGroup = addRequirementCmd.add_mutually_exclusive_group(required=True)
+addRequirementCmdURLGroup.add_argument("--originURL")
+addRequirementCmdURLGroup.add_argument(
+    "--basename",
+    help="basename can only be specified if the requirement already exists and this is "
+    "an update operation")
+addRequirementCmdHashGroup = addRequirementCmd.add_mutually_exclusive_group(required=True)
+addRequirementCmdHashGroup.add_argument("--hash")
+addRequirementCmdHashGroup.add_argument("--master", action='store_true')
 removeRequirementCmd = subparsers.add_parser(
     "removerequirement",
     help="remove the dependency on build products")
@@ -101,7 +109,18 @@ elif args.cmd == "checkrequirements":
     checkrequirements.CheckRequirements().go()
 elif args.cmd == "addrequirement":
     mani = manifest.Manifest.fromLocalDirOrNew()
-    mani.addRequirement(originURL=args.originURL, hash=args.hash)
+    if args.basename:
+        originURL = mani.findRequirementByBasename(args.basename)['originURL']
+        logging.info("Basename '%(basename)s' matches originURL '%(originURL)s'", dict(
+            basename=args.basename, originURL=originURL))
+    else:
+        originURL = args.originURL
+    if args.master:
+        hash = run.run(["git", "ls-remote", originURL, "HEAD"]).strip().split("\t")[0]
+        logging.info("Latest hash is '%(hash)s'", dict(hash=hash))
+    else:
+        hash = args.hash
+    mani.addRequirement(originURL=originURL, hash=hash)
     mani.save()
 elif args.cmd == "removerequirement":
     mani = manifest.Manifest.fromLocalDir()

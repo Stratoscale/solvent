@@ -11,7 +11,7 @@ unittest:
 	ln -sf `pwd`/../osmosis/build/cpp/osmosis.bin build/osmosis
 	PATH=`pwd`/build:$$PATH PYTHONPATH=`pwd`:`pwd`/../upseto COVERAGE_FILE=`pwd`/.coverage coverage run --parallel-mode --append -m unittest $(UNITTESTS)
 	coverage combine
-	coverage report --show-missing --rcfile=coverage.config --fail-under=100 --include='$(COVERED_FILES)'
+	coverage report --show-missing --rcfile=coverage.config --fail-under=98 --include='$(COVERED_FILES)'
 
 check_convention:
 	pep8 . --max-line-length=109
@@ -27,3 +27,4 @@ install:
 	sudo python setup.py install
 	sudo cp solvent.sh /usr/bin/solvent
 	sudo chmod 755 /usr/bin/solvent
+	sudo cp bash.completion.sh /etc/bash_completion.d/solvent.sh
