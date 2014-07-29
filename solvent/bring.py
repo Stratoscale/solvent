@@ -23,7 +23,8 @@ class Bring:
         logging.info("Checking out '%(label)s'", dict(label=label))
         if not os.path.isdir(destination):
             os.makedirs(destination)
+        myUIDandGID = ["--myUIDandGIDcheckout"] if os.getuid() != 0 else []
         run.run([
             "osmosis", "checkout", destination, label,
             "--MD5", "--removeUnknownFiles", "--putIfMissing",
-            "--objectStores=" + config.objectStoresOsmosisParameter()])
+            "--objectStores=" + config.objectStoresOsmosisParameter()] + myUIDandGID)
