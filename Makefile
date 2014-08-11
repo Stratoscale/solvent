@@ -24,6 +24,7 @@ install:
 	-yes | sudo pip uninstall solvent
 	python setup.py build
 	python setup.py bdist
+	python setup.py bdist_egg
 	sudo python setup.py install
 	sudo cp solvent.sh /usr/bin/solvent
 	sudo chmod 755 /usr/bin/solvent
