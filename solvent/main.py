@@ -9,6 +9,7 @@ from solvent import checkrequirements
 from solvent import manifest
 from solvent import requirementlabel
 from solvent import run
+from upseto import gitwrapper
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -84,7 +85,9 @@ printLabelCmd = subparsers.add_parser(
     "printlabel",
     help="print the current label of a dependency")
 printLabelCmd.add_argument("--product", required=True)
-printLabelCmd.add_argument("--repositoryBasename", required=True)
+repoGroup = printLabelCmd.add_mutually_exclusive_group(required=True)
+repoGroup.add_argument("--repositoryBasename")
+repoGroup.add_argument("--thisProject", action="store_true")
 args = parser.parse_args()
 
 config.load(args.configurationFile)
@@ -129,8 +132,14 @@ elif args.cmd == "removerequirement":
 elif args.cmd == "printobjectstores":
     print config.objectStoresOsmosisParameter()
 elif args.cmd == "printlabel":
-    label = requirementlabel.RequirementLabel(
-        basename=args.repositoryBasename, product=args.product, hash=None)
+    if args.thisProject:
+        gitWrapper = gitwrapper.GitWrapper('.')
+        hash = gitWrapper.hash()
+        basename = gitWrapper.originURLBasename()
+    else:
+        hash = None
+        basename = args.repositoryBasename
+    label = requirementlabel.RequirementLabel(basename=basename, product=args.product, hash=hash)
     print label.matching()
 else:
     raise AssertionError("No such command")
