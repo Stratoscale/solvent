@@ -523,6 +523,14 @@ class Test(unittest.TestCase):
         self.osmosisPair.local.client().renameLabel(label, buildLabel)
         solventwrapper.run(localClone1, "checkrequirements")
 
+    def test_SubmitTwiceDoesNotWork_ForceWorks(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+
+        solventwrapper.run(localClone1, "submitbuild")
+        solventwrapper.runShouldFail(localClone1, "submitbuild", "already")
+        solventwrapper.run(localClone1, "submitbuild --force")
+        solventwrapper.runShouldFail(localClone1, "submitbuild", "already")
+        solventwrapper.run(localClone1, "submitbuild", env=dict(SOLVENT_CONFIG="FORCE: yes"))
 
 # indirect deep dep joined
 # remove unosmosed files

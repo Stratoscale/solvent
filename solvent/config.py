@@ -8,6 +8,7 @@ OFFICIAL_OSMOSIS = None
 OFFICIAL_BUILD = False
 WITH_OFFICIAL_OBJECT_STORE = True
 CLEAN = False
+FORCE = False
 
 
 def load(filename):

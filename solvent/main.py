@@ -19,11 +19,17 @@ subparsers = parser.add_subparsers(dest="cmd")
 submitbuildCmd = subparsers.add_parser(
     "submitbuild",
     help="submit the current workspace as a built version of this git project")
+submitbuildCmd.add_argument(
+    "--force", action="store_true",
+    help="submit overriding previous identical label, if exists")
 submitproductCmd = subparsers.add_parser(
     "submitproduct",
     help="create a specific build product, and submit it in candidate state")
 submitproductCmd.add_argument("productname")
 submitproductCmd.add_argument("directory")
+submitproductCmd.add_argument(
+    "--force", action="store_true",
+    help="submit overriding previous identical label, if exists")
 approveCmd = subparsers.add_parser(
     "approve",
     help="promote a candidate build product to a non candidate. E.g., if "
@@ -92,8 +98,12 @@ args = parser.parse_args()
 
 config.load(args.configurationFile)
 if args.cmd == "submitbuild":
+    if args.force:
+        config.FORCE = True
     submit.Submit(product="build", directory="..").go()
 elif args.cmd == "submitproduct":
+    if args.force:
+        config.FORCE = True
     submit.Submit(product=args.productname, directory=args.directory).go()
 elif args.cmd == "approve":
     approve.Approve(product=args.product).go()

@@ -27,14 +27,33 @@ class Submit:
 
     def go(self):
         logging.info("Submitting locally as '%(label)s'", dict(label=self._label))
+        self._work(config.LOCAL_OSMOSIS)
+        if config.WITH_OFFICIAL_OBJECT_STORE:
+            logging.info("Submitting to official store as '%(label)s'", dict(label=self._label))
+            self._work(config.OFFICIAL_OSMOSIS)
+        logging.info("Submitted as '%(label)s'", dict(label=self._label))
+
+    def _hasLabel(self, objectStore):
+        output = run.run([
+            "osmosis", "listlabels", '^' + self._label + '$', "--objectStores", objectStore])
+        return len(output.split('\n')) > 1
+
+    def _checkin(self, objectStore):
         run.run([
             "osmosis", "checkin", self._directory, self._label,
             "--MD5",
-            "--objectStores=" + config.LOCAL_OSMOSIS])
-        if config.WITH_OFFICIAL_OBJECT_STORE:
-            logging.info("Submitting to official store as '%(label)s'", dict(label=self._label))
-            run.run([
-                "osmosis", "checkin", self._directory, self._label,
-                "--MD5",
-                "--objectStores=" + config.OFFICIAL_OSMOSIS])
-        logging.info("Submitted as '%(label)s'", dict(label=self._label))
+            "--objectStores", objectStore])
+
+    def _eraseLabel(self, objectStore):
+        run.run([
+            "osmosis", "eraselabel", self._label,
+            "--objectStores", objectStore])
+
+    def _work(self, objectStore):
+        if self._hasLabel(objectStore):
+            if config.FORCE:
+                self._eraseLabel(objectStore)
+            else:
+                raise Exception("Object store '%s' already has a label '%s'" % (
+                    objectStore, self._label))
+        self._checkin(objectStore)
