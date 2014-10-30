@@ -9,6 +9,7 @@ from solvent import checkrequirements
 from solvent import manifest
 from solvent import requirementlabel
 from solvent import run
+from solvent import commonmistakes
 from upseto import gitwrapper
 import logging
 
@@ -22,6 +23,9 @@ submitbuildCmd = subparsers.add_parser(
 submitbuildCmd.add_argument(
     "--force", action="store_true",
     help="submit overriding previous identical label, if exists")
+submitbuildCmd.add_argument(
+    "--noCommonMistakesProtection", action="store_true",
+    help="disable failure on common mistakes (like submitting while /proc is mounted")
 submitproductCmd = subparsers.add_parser(
     "submitproduct",
     help="create a specific build product, and submit it in candidate state")
@@ -30,6 +34,9 @@ submitproductCmd.add_argument("directory")
 submitproductCmd.add_argument(
     "--force", action="store_true",
     help="submit overriding previous identical label, if exists")
+submitproductCmd.add_argument(
+    "--noCommonMistakesProtection", action="store_true",
+    help="disable failure on common mistakes (like submitting while /proc is mounted")
 approveCmd = subparsers.add_parser(
     "approve",
     help="promote a candidate build product to a non candidate. E.g., if "
@@ -100,10 +107,14 @@ config.load(args.configurationFile)
 if args.cmd == "submitbuild":
     if args.force:
         config.FORCE = True
+    if not args.noCommonMistakesProtection:
+        commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission("..")
     submit.Submit(product="build", directory="..").go()
 elif args.cmd == "submitproduct":
     if args.force:
         config.FORCE = True
+    if not args.noCommonMistakesProtection:
+        commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission(args.directory)
     submit.Submit(product=args.productname, directory=args.directory).go()
 elif args.cmd == "approve":
     approve.Approve(product=args.product).go()

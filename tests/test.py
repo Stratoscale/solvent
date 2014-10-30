@@ -6,6 +6,7 @@ import unittest
 import upseto
 import osmosiswrapper
 import tempfile
+import subprocess
 
 
 class Test(unittest.TestCase):
@@ -14,6 +15,17 @@ class Test(unittest.TestCase):
         gitwrapper.setUp()
         self.fixture()
         self.cleanLocalClonesDir()
+        self.resetFakeMount()
+
+    def resetFakeMount(self):
+        if os.path.exists("build/mount"):
+            os.unlink("build/mount")
+        mount = subprocess.check_output(["mount"])
+        with open("build/mount", "w") as f:
+            f.write("#!/bin/sh\ncat %s/build/mount.txt\n" % os.getcwd())
+        os.chmod("build/mount", 0755)
+        with open("build/mount.txt", "w") as f:
+            f.write(mount)
 
     def cleanLocalClonesDir(self):
         shutil.rmtree(gitwrapper.localClonesDir())
@@ -532,6 +544,22 @@ class Test(unittest.TestCase):
         solventwrapper.runShouldFail(localClone1, "submitbuild", "already")
         solventwrapper.run(localClone1, "submitbuild", env=dict(SOLVENT_CONFIG="FORCE: yes"))
 
+    def test_ProtectAgainstCommonMistakes_ProcMounted(self):
+        self.producer = gitwrapper.GitHub("producer")
+        localProducer = gitwrapper.LocalClone(self.producer)
+        localProducer.writeFile("build/rootfs/etc/config", "the contents")
+        os.mkdir(os.path.join(localProducer.directory(), "proc"))
+        with open("build/mount.txt", "a") as f:
+            f.write("proc on %s/proc type proc (rw,nosuid,nodev,noexec,relatime)\n" % (
+                os.path.join(localProducer.directory(), 'build', 'rootfs', 'proc'), ))
+        solventwrapper.runShouldFail(
+            localProducer, "submitproduct rootfs build/rootfs", "mounted")
+
+        solventwrapper.run(localProducer, "submitproduct rootfs build/rootfs --noCommonMistakesProtection")
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__producer__rootfs__%s__dirty' % self.producer.hash()
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
 # indirect deep dep joined
 # remove unosmosed files
 
