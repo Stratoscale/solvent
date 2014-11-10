@@ -26,11 +26,14 @@ class Submit:
                 "--allowNoManifest", "--unsullied", "--gitClean"])
 
     def go(self):
+        self._handleCollision(config.LOCAL_OSMOSIS)
+        if config.WITH_OFFICIAL_OBJECT_STORE:
+            self._handleCollision(config.OFFICIAL_OSMOSIS)
         logging.info("Submitting locally as '%(label)s'", dict(label=self._label))
-        self._work(config.LOCAL_OSMOSIS)
+        self._checkin(config.LOCAL_OSMOSIS)
         if config.WITH_OFFICIAL_OBJECT_STORE:
             logging.info("Submitting to official store as '%(label)s'", dict(label=self._label))
-            self._work(config.OFFICIAL_OSMOSIS)
+            self._checkin(config.OFFICIAL_OSMOSIS)
         logging.info("Submitted as '%(label)s'", dict(label=self._label))
 
     def _hasLabel(self, objectStore):
@@ -49,11 +52,10 @@ class Submit:
             "osmosis", "eraselabel", self._label,
             "--objectStores", objectStore])
 
-    def _work(self, objectStore):
+    def _handleCollision(self, objectStore):
         if self._hasLabel(objectStore):
             if config.FORCE:
                 self._eraseLabel(objectStore)
             else:
                 raise Exception("Object store '%s' already has a label '%s'" % (
                     objectStore, self._label))
-        self._checkin(objectStore)

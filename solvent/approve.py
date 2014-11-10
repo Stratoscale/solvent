@@ -26,11 +26,22 @@ class Approve:
             basename=self._basename, product=product, hash=hash, state=self._toState)
 
     def go(self):
-        run.run([
-            "osmosis", "renamelabel", self._fromLabel, self._toLabel,
-            "--objectStores=" + config.LOCAL_OSMOSIS])
+        self._handleCollision(config.LOCAL_OSMOSIS)
         if config.WITH_OFFICIAL_OBJECT_STORE:
-            run.run([
-                "osmosis", "renamelabel", self._fromLabel, self._toLabel,
-                "--objectStores=" + config.OFFICIAL_OSMOSIS])
+            self._handleCollision(config.OFFICIAL_OSMOSIS)
+        self._approve(config.LOCAL_OSMOSIS)
+        if config.WITH_OFFICIAL_OBJECT_STORE:
+            self._approve(config.OFFICIAL_OSMOSIS)
         logging.info("Approved as '%(label)s'", dict(label=self._toLabel))
+
+    def _approve(self, objectStore):
+        run.run(["osmosis", "renamelabel", self._fromLabel, self._toLabel, "--objectStores", objectStore])
+
+    def _handleCollision(self, objectStore):
+        if self._hasLabel(objectStore):
+            raise Exception("Object store '%s' already has a label '%s'" % (objectStore, self._label))
+
+    def _hasLabel(self, objectStore):
+        output = run.run([
+            "osmosis", "listlabels", '^' + self._toLabel + '$', "--objectStores", objectStore])
+        return len(output.split('\n')) > 1

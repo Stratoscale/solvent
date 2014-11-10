@@ -560,6 +560,17 @@ class Test(unittest.TestCase):
         label = 'solvent__producer__rootfs__%s__dirty' % self.producer.hash()
         self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
         self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+
+    def test_ApproveTwiceDoesNotWork_ForceDoesNothing(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localClone1, "submitbuild")
+        solventwrapper.run(localClone1, "approve")
+        solventwrapper.runShouldFail(localClone1, "approve", "already")
+        solventwrapper.runShouldFail(localClone1, "approve", "already", env=dict(
+            SOLVENT_CONFIG="FORCE: yes"))
+
 # indirect deep dep joined
 # remove unosmosed files
 
