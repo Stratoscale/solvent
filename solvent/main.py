@@ -10,8 +10,10 @@ from solvent import manifest
 from solvent import requirementlabel
 from solvent import run
 from solvent import commonmistakes
+from solvent import labelexists
 from upseto import gitwrapper
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 
@@ -101,6 +103,10 @@ printLabelCmd.add_argument("--product", required=True)
 repoGroup = printLabelCmd.add_mutually_exclusive_group(required=True)
 repoGroup.add_argument("--repositoryBasename")
 repoGroup.add_argument("--thisProject", action="store_true")
+labelExistsCmd = subparsers.add_parser(
+    "labelexists",
+    help="Test if an exact label exists in one of the object stores")
+labelExistsCmd.add_argument("--label", required=True)
 args = parser.parse_args()
 
 config.load(args.configurationFile)
@@ -162,5 +168,11 @@ elif args.cmd == "printlabel":
         basename = args.repositoryBasename
     label = requirementlabel.RequirementLabel(basename=basename, product=args.product, hash=hash)
     print label.matching()
+elif args.cmd == "labelexists":
+    if labelexists.LabelExists().exists(args.label):
+        print "Label exists"
+    else:
+        print "Label does not exist"
+        sys.exit(1)
 else:
     raise AssertionError("No such command")

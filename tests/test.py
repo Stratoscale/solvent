@@ -571,6 +571,24 @@ class Test(unittest.TestCase):
         solventwrapper.runShouldFail(localClone1, "approve", "already", env=dict(
             SOLVENT_CONFIG="FORCE: yes"))
 
+    def test_LabelExists(self):
+        localClone1 = gitwrapper.LocalClone(self.project1)
+        hash = localClone1.hash()
+        localClone1.writeFile("build/product1", "product1 contents")
+
+        solventwrapper.run(localClone1, "submitbuild")
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 1)
+        label = 'solvent__project1__build__%s__dirty' % hash
+        self.assertEquals(self.osmosisPair.local.client().listLabels(), [label])
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 1)
+        self.assertEquals(self.osmosisPair.official.client().listLabels(), [label])
+
+        solventwrapper.run(localClone1, 'labelexists --label=%s' % label)
+        solventwrapper.runShouldFail(localClone1, 'labelexists --label=%sA' % label, "exist")
+        solventwrapper.runShouldFail(localClone1, 'labelexists --label=A%s' % label, "exist")
+        solventwrapper.runShouldFail(localClone1, 'labelexists --label=A', "exist")
+        solventwrapper.runShouldFail(localClone1, 'labelexists --label=%s' % label[:-1], "exist")
+
 # indirect deep dep joined
 # remove unosmosed files
 
