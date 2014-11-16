@@ -1,5 +1,5 @@
 requirements:
-- hash: 1af47e2b356c01a0f721fc3e6dbd03b832b9741b
+- hash: 1d21d6540c15fed1f0ba90870b20f5f82629ec75
   originURL: https://github.com/Stratoscale/upseto.git
-- hash: e9eb111f0efdb93e98a87483374ce44a450b2c21
+- hash: 1a690ad01fea1a81182825ad1ebb28f039dbf2be
   originURL: https://github.com/Stratoscale/osmosis.git
