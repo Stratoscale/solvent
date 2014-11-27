@@ -11,6 +11,9 @@ import subprocess
 
 class Test(unittest.TestCase):
     def setUp(self):
+        for key in list(os.environ.keys()):
+            if 'SOLVENT' in key:
+                del os.environ[key]
         self.osmosisPair = osmosiswrapper.LocalAndOfficial()
         gitwrapper.setUp()
         self.fixture()

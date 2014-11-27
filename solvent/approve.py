@@ -39,7 +39,7 @@ class Approve:
 
     def _handleCollision(self, objectStore):
         if self._hasLabel(objectStore):
-            raise Exception("Object store '%s' already has a label '%s'" % (objectStore, self._label))
+            raise Exception("Object store '%s' already has a label '%s'" % (objectStore, self._toLabel))
 
     def _hasLabel(self, objectStore):
         output = run.run([
