@@ -11,7 +11,7 @@ unittest:
 	ln -sf `pwd`/../osmosis/build/cpp/osmosis.bin build/osmosis
 	PATH=`pwd`/build:$$PATH PYTHONPATH=`pwd`:`pwd`/../upseto COVERAGE_FILE=`pwd`/.coverage coverage run --parallel-mode --append -m unittest $(UNITTESTS)
 	coverage combine
-	coverage report --show-missing --rcfile=coverage.config --fail-under=97 --include='$(COVERED_FILES)'
+	coverage report --show-missing --rcfile=coverage.config --fail-under=94 --include='$(COVERED_FILES)'
 
 check_convention:
 	pep8 . --max-line-length=109

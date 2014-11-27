@@ -11,6 +11,7 @@ from solvent import requirementlabel
 from solvent import run
 from solvent import commonmistakes
 from solvent import labelexists
+from solvent import thisprojectlabel
 from upseto import gitwrapper
 import logging
 import sys
@@ -160,14 +161,12 @@ elif args.cmd == "printobjectstores":
     print config.objectStoresOsmosisParameter()
 elif args.cmd == "printlabel":
     if args.thisProject:
-        gitWrapper = gitwrapper.GitWrapper('.')
-        hash = gitWrapper.hash()
-        basename = gitWrapper.originURLBasename()
+        print thisprojectlabel.ThisProjectLabel(args.product).label()
     else:
         hash = None
         basename = args.repositoryBasename
-    label = requirementlabel.RequirementLabel(basename=basename, product=args.product, hash=hash)
-    print label.matching()
+        label = requirementlabel.RequirementLabel(basename=basename, product=args.product, hash=hash)
+        print label.matching()
 elif args.cmd == "labelexists":
     if labelexists.LabelExists().exists(args.label):
         print "Label exists"
