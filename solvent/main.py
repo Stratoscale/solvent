@@ -1,5 +1,6 @@
 import argparse
 from solvent import submit
+from solvent import unsubmit
 from solvent import approve
 from solvent import bring
 from solvent import localize
@@ -40,6 +41,9 @@ submitproductCmd.add_argument(
 submitproductCmd.add_argument(
     "--noCommonMistakesProtection", action="store_true",
     help="disable failure on common mistakes (like submitting while /proc is mounted")
+unsubmitCmd = subparsers.add_parser(
+    "unsubmit",
+    help="erase all submitted build products (does not affect approved build products)")
 approveCmd = subparsers.add_parser(
     "approve",
     help="promote a candidate build product to a non candidate. E.g., if "
@@ -123,6 +127,8 @@ elif args.cmd == "submitproduct":
     if not args.noCommonMistakesProtection:
         commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission(args.directory)
     submit.Submit(product=args.productname, directory=args.directory).go()
+elif args.cmd == "unsubmit":
+    unsubmit.Unsubmit().go()
 elif args.cmd == "approve":
     approve.Approve(product=args.product).go()
 elif args.cmd == "bring":

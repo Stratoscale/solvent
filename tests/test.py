@@ -592,6 +592,25 @@ class Test(unittest.TestCase):
         solventwrapper.runShouldFail(localClone1, 'labelexists --label=A', "exist")
         solventwrapper.runShouldFail(localClone1, 'labelexists --label=%s' % label[:-1], "exist")
 
+    def test_unsubmit_official(self):
+        self.producer = gitwrapper.GitHub("producer")
+        localProducer = gitwrapper.LocalClone(self.producer)
+        localProducer.writeFile("build/theDirectory/theProduct", "the contents")
+        solventwrapper.configureAsOfficial()
+        solventwrapper.run(localProducer, "submitbuild")
+        solventwrapper.run(localProducer, "submitproduct theProductName build")
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 2)
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 2)
+        label = 'solvent__producer__theProductName__%s__officialcandidate' % self.producer.hash()
+        self.assertIn(label, self.osmosisPair.local.client().listLabels())
+        label = 'solvent__producer__build__%s__officialcandidate' % self.producer.hash()
+        self.assertIn(label, self.osmosisPair.local.client().listLabels())
+
+        solventwrapper.run(localProducer, "unsubmit")
+
+        self.assertEquals(len(self.osmosisPair.official.client().listLabels()), 0)
+        self.assertEquals(len(self.osmosisPair.local.client().listLabels()), 0)
+
 # indirect deep dep joined
 # remove unosmosed files
 
