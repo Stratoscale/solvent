@@ -21,6 +21,7 @@ setup(
         "Topic :: Utilities",
     ],
     install_requires=[
+        "PyYAML==3.11",
         "upseto",
     ],
 )
