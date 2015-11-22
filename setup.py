@@ -1,5 +1,18 @@
 import os
+import os.path
 from setuptools import setup
+
+data_files = []
+
+# add in case we are running as root
+if os.geteuid() == 0:
+    data_files += [
+        ('/etc/bash_completion.d', ['conf/bash_completion.d/solvent.sh']),
+    ]
+    if not os.path.exists("/etc/solvent.conf"):
+        data_files += [
+            ("/etc", ['conf/solvent.conf']),
+        ]
 
 
 def read(fname):
@@ -21,7 +34,8 @@ setup(
         "Topic :: Utilities",
     ],
     install_requires=[
-        "PyYAML==3.11",
-        "upseto",
     ],
+    include_package_data=True,
+    data_files=data_files,
+    scripts=['sh/solvent']
 )

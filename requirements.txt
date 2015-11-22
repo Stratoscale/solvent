@@ -1,0 +1,2 @@
+git+https://github.com/Stratoscale/upseto.git@master
+PyYAML==3.11
