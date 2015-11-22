@@ -1,5 +1,14 @@
 import os
+import os.path
 from setuptools import setup
+from os.path import expanduser
+
+data_files = []
+
+# add in case we are running as root
+if os.geteuid() == 0:
+    if not os.path.exists("/etc/solvent.conf"):
+        data_files.append(("/etc", ['solvent.conf']))
 
 
 def read(fname):
@@ -24,4 +33,6 @@ setup(
         "PyYAML==3.11",
         "upseto",
     ],
+    include_package_data=True,
+    data_files=data_files,
 )
