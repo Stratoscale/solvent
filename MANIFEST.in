@@ -1,0 +1,2 @@
+include conf/solvent.conf
+include conf/bash_completion.d/solvent.sh
