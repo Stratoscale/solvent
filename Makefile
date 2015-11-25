@@ -19,14 +19,10 @@ check_convention:
 uninstall:
 	-yes | sudo pip uninstall solvent
 	-sudo rm -f /etc/bash_completion.d/solvent.sh
-	sudo rm /usr/bin/solvent
+	-sudo rm /usr/bin/solvent
 
-install:
-	-yes | sudo pip uninstall solvent
+install: uninstall
 	python setup.py build
 	python setup.py bdist
 	python setup.py bdist_egg
-	sudo python setup.py install
-	sudo cp solvent.sh /usr/bin/solvent
-	sudo chmod 755 /usr/bin/solvent
-	sudo cp bash.completion.sh /etc/bash_completion.d/solvent.sh
+	sudo pip install ./
