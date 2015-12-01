@@ -1,14 +1,14 @@
 import os
 import os.path
 from setuptools import setup
-from os.path import expanduser
 
 data_files = []
 
 # add in case we are running as root
 if os.geteuid() == 0:
-    if not os.path.exists("/etc/solvent.conf"):
-        data_files.append(("/etc", ['solvent.conf']))
+    if not os.path.exists('/etc/solvent.conf'):
+        data_files.append(("/etc", ['conf/solvent.conf']))
+    data_files.append(('/etc/bash_completion.d', ['conf/bash_completion.d/solvent.sh']))
 
 
 def read(fname):
@@ -35,4 +35,5 @@ setup(
     ],
     include_package_data=True,
     data_files=data_files,
+    scripts=['sh/solvent']
 )
