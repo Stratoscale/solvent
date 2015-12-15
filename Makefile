@@ -17,13 +17,8 @@ check_convention:
 	pep8 . --max-line-length=109
 
 uninstall:
-	-yes | sudo pip uninstall solvent
-	-sudo rm -f /etc/bash_completion.d/solvent.sh
-	sudo rm -f /usr/bin/solvent /usr/local/bin/solvent
+	-sudo pip uninstall -y solvent
 
 install: uninstall
-	python setup.py build
-	python setup.py bdist
-	python setup.py bdist_egg
 	sudo pip install -r requirements.txt 
-	sudo python setup.py install
+	sudo pip install .

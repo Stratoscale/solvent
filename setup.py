@@ -7,13 +7,6 @@ data_files = []
 
 # add in case we are running as root
 if os.geteuid() == 0:
-    if not os.path.exists("/etc/solvent.conf"):
-        data_files.append(("/etc", ['solvent.conf']))
-
-data_files = []
-
-# add in case we are running as root
-if os.geteuid() == 0:
     data_files += [
         ('/etc/bash_completion.d', ['conf/bash_completion.d/solvent.sh']),
     ]
