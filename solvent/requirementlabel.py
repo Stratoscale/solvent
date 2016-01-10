@@ -31,6 +31,8 @@ class RequirementLabel:
                 if self._clean() in labelsInOfficial:
                     return self._clean()
                 if not config.CLEAN:
+                    if self._cleancandidate() in labelsInOfficial:
+                        return self._cleancandidate()
                     if self._dirty() in labelsInOfficial:
                         return self._dirty()
         raise Exception("No built label (in apropriate state) found for '%s' product '%s' (%s)" % (
@@ -50,6 +52,9 @@ class RequirementLabel:
 
     def _dirty(self):
         return self._base(state="dirty")
+
+    def _cleancandidate(self):
+        return self._base(state="cleancandidate")
 
     def _existing(self, objectStore):
         output = run.run(["osmosis", "listlabels", self._regex(), "--objectStores=" + objectStore])
