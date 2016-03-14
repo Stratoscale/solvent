@@ -423,16 +423,28 @@ class Test(unittest.TestCase):
         cleanLabel = 'solvent__producer__theProductName__%s__clean' % self.producer.hash()
         dirtyLabel = 'solvent__producer__theProductName__%s__dirty' % self.producer.hash()
 
-        getCleanLabel = lambda: solventwrapper.run(
-            localClone1, "printlabel --repositoryBasename=producer --product=theProductName",
-            env=dict(SOLVENT_CLEAN="Yes")).strip()
-        getDirtyLabel = lambda: solventwrapper.run(
-            localClone1, "printlabel --repositoryBasename=producer --product=theProductName").strip()
-        noCleanLabel = lambda: solventwrapper.runShouldFail(
-            localClone1, "printlabel --repositoryBasename=producer --product=theProductName", "requirement",
-            env=dict(SOLVENT_CLEAN="yes"))
-        noDirtyLabel = lambda: solventwrapper.runShouldFail(
-            localClone1, "printlabel --repositoryBasename=producer --product=theProductName", "requirement")
+        def getCleanLabel():
+            return solventwrapper.run(
+                localClone1, "printlabel --repositoryBasename=producer --product=theProductName",
+                env=dict(SOLVENT_CLEAN="Yes")).strip()
+
+        def getDirtyLabel():
+            return solventwrapper.run(
+                localClone1, "printlabel --repositoryBasename=producer --product=theProductName").strip()
+
+        def noCleanLabel():
+            return solventwrapper.runShouldFail(
+                localClone1,
+                "printlabel --repositoryBasename=producer --product=theProductName",
+                "requirement",
+                env=dict(SOLVENT_CLEAN="yes"))
+
+        def noDirtyLabel():
+            return solventwrapper.runShouldFail(
+                localClone1,
+                "printlabel --repositoryBasename=producer --product=theProductName",
+                "requirement")
+
         return dict(
             getCleanLabel=getCleanLabel, getDirtyLabel=getDirtyLabel,
             noCleanLabel=noCleanLabel, noDirtyLabel=noDirtyLabel,
