@@ -9,7 +9,7 @@ unittest:
 	rm -f .coverage*
 	-mkdir build
 	ln -sf `pwd`/../osmosis/build/cpp/osmosis.bin build/osmosis
-	PATH=`pwd`/build:$$PATH PYTHONPATH=`pwd`:`pwd`/../upseto COVERAGE_FILE=`pwd`/.coverage python -m coverage run --parallel-mode --append -m unittest $(UNITTESTS)
+	PATH=`pwd`/build:$$PATH PYTHONPATH=`pwd`:`pwd`/../upseto COVERAGE_FILE=`pwd`/.coverage python -m coverage run --append -m unittest $(UNITTESTS)
 	python -m coverage combine
 	python -m coverage report --show-missing --rcfile=coverage.config --fail-under=94 --include='$(COVERED_FILES)'
 
