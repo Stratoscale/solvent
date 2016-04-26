@@ -7,8 +7,9 @@ import os
 
 
 class Approve:
-    def __init__(self, product):
+    def __init__(self, product, ignoreFailureOnLocalObjectStore=False):
         self._product = product
+        self._ignoreFailureOnLocalObjectStore = ignoreFailureOnLocalObjectStore
         git = gitwrapper.GitWrapper(os.getcwd())
         self._basename = git.originURLBasename()
         if config.OFFICIAL_BUILD:
@@ -29,7 +30,14 @@ class Approve:
         self._handleCollision(config.LOCAL_OSMOSIS)
         if config.WITH_OFFICIAL_OBJECT_STORE:
             self._handleCollision(config.OFFICIAL_OSMOSIS)
-        self._approve(config.LOCAL_OSMOSIS)
+        try:
+            self._approve(config.LOCAL_OSMOSIS)
+        except Exception as ex:
+            if self._ignoreFailureOnLocalObjectStore:
+                logging.info("Ignoring a failure while approving on the local object store: %s",
+                             ex.message)
+            else:
+                raise
         if config.WITH_OFFICIAL_OBJECT_STORE:
             self._approve(config.OFFICIAL_OSMOSIS)
         logging.info("Approved as '%(label)s'", dict(label=self._toLabel))

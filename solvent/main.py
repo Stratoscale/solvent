@@ -50,6 +50,7 @@ approveCmd = subparsers.add_parser(
     "on submitproduct the product was in 'cleancandidate' state, it will "
     "be switched to 'clean' state")
 approveCmd.add_argument("--product", default="build")
+approveCmd.add_argument("--ignoreFailureOnLocalObjectStore", action="store_true", default=False)
 bringCmd = subparsers.add_parser(
     "bring", help="checkout specific prebuilt build product")
 bringCmd.add_argument("--product", required=True)
@@ -130,7 +131,8 @@ elif args.cmd == "submitproduct":
 elif args.cmd == "unsubmit":
     unsubmit.Unsubmit().go()
 elif args.cmd == "approve":
-    approve.Approve(product=args.product).go()
+    approve.Approve(product=args.product,
+                    ignoreFailureOnLocalObjectStore=args.ignoreFailureOnLocalObjectStore).go()
 elif args.cmd == "bring":
     bring.Bring(
         product=args.product, repositoryBasename=args.repositoryBasename,
