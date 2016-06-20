@@ -16,8 +16,10 @@ from solvent import thisprojectlabel
 from upseto import gitwrapper
 import logging
 import sys
+import os
 
 logging.basicConfig(level=logging.INFO)
+
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(dest="cmd")
@@ -96,7 +98,7 @@ checkRequirementsCmd = subparsers.add_parser(
     help="check upseto and solvent requirements labels exist in either local or "
     "official objects stores")
 parser.add_argument(
-    "--configurationFile", default="/etc/solvent.conf",
+    "--configurationFile", default=os.path.join(sys.prefix, "etc/solvent.conf"),
     help="override configuration file location")
 subparsers.add_parser(
     "printobjectstores",
@@ -113,73 +115,75 @@ labelExistsCmd = subparsers.add_parser(
     "labelexists",
     help="Test if an exact label exists in one of the object stores")
 labelExistsCmd.add_argument("--label", required=True)
-args = parser.parse_args()
+    
 
-config.load(args.configurationFile)
-if args.cmd == "submitbuild":
-    if args.force:
-        config.FORCE = True
-    if not args.noCommonMistakesProtection:
-        commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission("..")
-    submit.Submit(product="build", directory="..").go()
-elif args.cmd == "submitproduct":
-    if args.force:
-        config.FORCE = True
-    if not args.noCommonMistakesProtection:
-        commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission(args.directory)
-    submit.Submit(product=args.productname, directory=args.directory).go()
-elif args.cmd == "unsubmit":
-    unsubmit.Unsubmit().go()
-elif args.cmd == "approve":
-    approve.Approve(product=args.product,
-                    ignoreFailureOnLocalObjectStore=args.ignoreFailureOnLocalObjectStore).go()
-elif args.cmd == "bring":
-    bring.Bring(
-        product=args.product, repositoryBasename=args.repositoryBasename,
-        hash=args.hash, destination=args.destination).go()
-elif args.cmd == "bringlabel":
-    bring.Bring.label(args.label, args.destination)
-elif args.cmd == "localize":
-    localize.Localize(
-        label=args.label).go()
-elif args.cmd == "fulfillrequirements":
-    fulfillrequirements.FulfillRequirements().go()
-elif args.cmd == "checkrequirements":
-    checkrequirements.CheckRequirements().go()
-elif args.cmd == "addrequirement":
-    mani = manifest.Manifest.fromLocalDirOrNew()
-    if args.basename:
-        originURL = mani.findRequirementByBasename(args.basename)['originURL']
-        logging.info("Basename '%(basename)s' matches originURL '%(originURL)s'", dict(
-            basename=args.basename, originURL=originURL))
+def main():
+    args = parser.parse_args()
+    config.load(args.configurationFile)
+    if args.cmd == "submitbuild":
+        if args.force:
+            config.FORCE = True
+        if not args.noCommonMistakesProtection:
+            commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission("..")
+        submit.Submit(product="build", directory="..").go()
+    elif args.cmd == "submitproduct":
+        if args.force:
+            config.FORCE = True
+        if not args.noCommonMistakesProtection:
+            commonmistakes.CommonMistakes().checkDirectoryBeforeSubmission(args.directory)
+        submit.Submit(product=args.productname, directory=args.directory).go()
+    elif args.cmd == "unsubmit":
+        unsubmit.Unsubmit().go()
+    elif args.cmd == "approve":
+        approve.Approve(product=args.product,
+                        ignoreFailureOnLocalObjectStore=args.ignoreFailureOnLocalObjectStore).go()
+    elif args.cmd == "bring":
+        bring.Bring(
+            product=args.product, repositoryBasename=args.repositoryBasename,
+            hash=args.hash, destination=args.destination).go()
+    elif args.cmd == "bringlabel":
+        bring.Bring.label(args.label, args.destination)
+    elif args.cmd == "localize":
+        localize.Localize(
+            label=args.label).go()
+    elif args.cmd == "fulfillrequirements":
+        fulfillrequirements.FulfillRequirements().go()
+    elif args.cmd == "checkrequirements":
+        checkrequirements.CheckRequirements().go()
+    elif args.cmd == "addrequirement":
+        mani = manifest.Manifest.fromLocalDirOrNew()
+        if args.basename:
+            originURL = mani.findRequirementByBasename(args.basename)['originURL']
+            logging.info("Basename '%(basename)s' matches originURL '%(originURL)s'", dict(
+                basename=args.basename, originURL=originURL))
+        else:
+            originURL = args.originURL
+        if args.master:
+            hash = run.run(["git", "ls-remote", originURL, "HEAD"]).strip().split("\t")[0]
+            logging.info("Latest hash is '%(hash)s'", dict(hash=hash))
+        else:
+            hash = args.hash
+        mani.addRequirement(originURL=originURL, hash=hash)
+        mani.save()
+    elif args.cmd == "removerequirement":
+        mani = manifest.Manifest.fromLocalDir()
+        mani.delRequirementByBasename(basename=args.originURLBasename)
+        mani.save()
+    elif args.cmd == "printobjectstores":
+        print config.objectStoresOsmosisParameter()
+    elif args.cmd == "printlabel":
+        if args.thisProject:
+            print thisprojectlabel.ThisProjectLabel(args.product).label()
+        else:
+            hash = None
+            basename = args.repositoryBasename
+            label = requirementlabel.RequirementLabel(basename=basename, product=args.product, hash=hash)
+            print label.matching()
+    elif args.cmd == "labelexists":
+        if labelexists.LabelExists().exists(args.label):
+            print "Label exists"
+        else:
+            print "Label does not exist"
+            sys.exit(1)
     else:
-        originURL = args.originURL
-    if args.master:
-        hash = run.run(["git", "ls-remote", originURL, "HEAD"]).strip().split("\t")[0]
-        logging.info("Latest hash is '%(hash)s'", dict(hash=hash))
-    else:
-        hash = args.hash
-    mani.addRequirement(originURL=originURL, hash=hash)
-    mani.save()
-elif args.cmd == "removerequirement":
-    mani = manifest.Manifest.fromLocalDir()
-    mani.delRequirementByBasename(basename=args.originURLBasename)
-    mani.save()
-elif args.cmd == "printobjectstores":
-    print config.objectStoresOsmosisParameter()
-elif args.cmd == "printlabel":
-    if args.thisProject:
-        print thisprojectlabel.ThisProjectLabel(args.product).label()
-    else:
-        hash = None
-        basename = args.repositoryBasename
-        label = requirementlabel.RequirementLabel(basename=basename, product=args.product, hash=hash)
-        print label.matching()
-elif args.cmd == "labelexists":
-    if labelexists.LabelExists().exists(args.label):
-        print "Label exists"
-    else:
-        print "Label does not exist"
-        sys.exit(1)
-else:
-    raise AssertionError("No such command")
+        raise AssertionError("No such command")
