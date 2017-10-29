@@ -1,2 +1,3 @@
 git+https://github.com/Stratoscale/upseto.git@master
+git+https://github.com/Stratoscale/pyracktest.git@ruslan/bolt
 PyYAML==3.11

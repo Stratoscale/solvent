@@ -1,7 +1,7 @@
 from solvent import config
 from solvent import run
 from solvent import label
-from upseto import gitwrapper
+from strato.racktest.infra import gitwrapper
 import logging
 import os
 

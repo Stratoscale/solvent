@@ -1,7 +1,7 @@
 import yaml
 import os
 import re
-from upseto import gitwrapper
+from strato.racktest.infra import gitwrapper
 
 
 class Manifest:

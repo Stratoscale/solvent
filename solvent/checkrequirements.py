@@ -1,6 +1,5 @@
 from solvent import requirementlabel
-from upseto import gitwrapper
-import upseto.manifest
+from strato.racktest.infra import gitwrapper
 import solvent.manifest
 import logging
 
@@ -8,6 +7,7 @@ import logging
 class CheckRequirements:
     def __init__(self):
         self._requirements = []
+        import upseto.manifest  # TODO: deprecate
         upsetoManifest = upseto.manifest.Manifest.fromLocalDirOrNew()
         for requirement in upsetoManifest.requirements():
             self._requirements.append((

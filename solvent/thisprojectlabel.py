@@ -1,7 +1,7 @@
 from solvent import config
 from solvent import label
 from solvent import run
-from upseto import gitwrapper
+from strato.racktest.infra import gitwrapper
 
 
 class ThisProjectLabel:

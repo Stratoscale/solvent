@@ -1,13 +1,13 @@
 from solvent import config
 from solvent import run
 from solvent import requirementlabel
-from upseto import gitwrapper
-from upseto import manifest
+from strato.racktest.infra import gitwrapper
 import logging
 
 
 class FulfillRequirements:
     def __init__(self):
+        from upseto import manifest  # TODO: deprecate
         mani = manifest.Manifest.fromLocalDirOrNew()
         self._requirements = []
         for requirement in mani.requirements():

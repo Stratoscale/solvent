@@ -13,7 +13,7 @@ from solvent import run
 from solvent import commonmistakes
 from solvent import labelexists
 from solvent import thisprojectlabel
-from upseto import gitwrapper
+from strato.racktest.infra import gitwrapper
 import logging
 import sys
 
