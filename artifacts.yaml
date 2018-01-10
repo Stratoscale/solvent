@@ -1,0 +1,7 @@
+version: 2
+
+services:
+
+  solvent:
+      pips:
+      - dist/solvent-*.tar.gz

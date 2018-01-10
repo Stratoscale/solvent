@@ -4,16 +4,12 @@ from setuptools import setup
 from os.path import expanduser
 
 data_files = []
-
-# add in case we are running as root
-if os.geteuid() == 0:
-    data_files += [
-        ('/etc/bash_completion.d', ['conf/bash_completion.d/solvent.sh']),
-    ]
-    if not os.path.exists("/etc/solvent.conf"):
-        data_files += [
-            ("/etc", ['conf/solvent.conf']),
-        ]
+data_files += [
+    ('/etc/bash_completion.d', ['conf/bash_completion.d/solvent.sh']),
+]
+data_files += [
+    ("/etc", ['conf/solvent.conf']),
+]
 
 
 def read(fname):
@@ -21,7 +17,8 @@ def read(fname):
 
 setup(
     name="solvent",
-    version="1.0",
+    # version="1.0",
+    git_version=True,
     author="Shlomo Matichin",
     author_email="shlomi@stratoscale.com",
     description=(

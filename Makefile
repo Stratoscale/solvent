@@ -1,7 +1,11 @@
-all: unittest check_convention
+# all: unittest check_convention
+all: clean build
 
 clean:
 	rm -fr build dist solvent.egg-info
+
+build:
+	python setup.py sdist bdist_wheel --universal
 
 UNITTESTS=$(shell find tests -name 'test*.py' | sed 's@/@.@g' | sed 's/\(.*\)\.py/\1/' | sort)
 COVERED_FILES=solvent/*.py
@@ -20,5 +24,5 @@ uninstall:
 	-sudo pip uninstall -y solvent
 
 install: uninstall
-	sudo pip install -r requirements.txt 
+	sudo pip install -r requirements.txt
 	sudo pip install .
