@@ -4,3 +4,4 @@ build
 dist
 solvent.egg-info
 .coverage*
+/.idea
