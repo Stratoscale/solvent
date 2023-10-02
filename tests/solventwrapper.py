@@ -37,7 +37,7 @@ def run(where, arguments, env=dict()):
         where = where.directory()
     try:
         output = subprocess.check_output(
-            "python -m coverage run --parallel-mode -m solvent.main " + _config() + arguments,
+            "python2 -m coverage run --parallel-mode -m solvent.main " + _config() + arguments,
             cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True, env=environment)
     except subprocess.CalledProcessError as e:
         print e.output
@@ -50,7 +50,7 @@ def upseto(where, arguments):
         where = where.directory()
     try:
         output = subprocess.check_output(
-            "python -m upseto.main " + arguments, cwd=where,
+            "python2 -m upseto.main " + arguments, cwd=where,
             shell=True, stderr=subprocess.STDOUT, close_fds=True)
     except subprocess.CalledProcessError as e:
         print e.output
@@ -65,7 +65,7 @@ def runShouldFail(where, arguments, partOfErrorMessage, env=dict()):
         where = where.directory()
     try:
         output = subprocess.check_output(
-            "python -m coverage run --parallel-mode -m solvent.main " + _config() + arguments,
+            "python2 -m coverage run --parallel-mode -m solvent.main " + _config() + arguments,
             cwd=where, shell=True, stderr=subprocess.STDOUT, close_fds=True, env=environment)
     except subprocess.CalledProcessError as e:
         if partOfErrorMessage in e.output.lower():

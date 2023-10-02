@@ -22,7 +22,7 @@ class Submit:
             basename=self._basename, product=self._product, hash=git.hash(), state=self._state)
         if config.OFFICIAL_BUILD or config.CLEAN:
             run.run([
-                "python", "-m", "upseto.main", "checkRequirements",
+                "python2", "-m", "upseto.main", "checkRequirements",
                 "--allowNoManifest", "--unsullied", "--gitClean"])
 
     def go(self):

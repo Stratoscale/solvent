@@ -380,7 +380,7 @@ class Test(unittest.TestCase):
 
         solventwrapper.runWhatever(
             localProducer.directory(),
-            "python -m coverage run --parallel-mode -m solvent.cheating --configurationFile=%s "
+            "python2 -m coverage run --parallel-mode -m solvent.cheating --configurationFile=%s "
             "changestate --fromState=dirty --toState=official --product=theProductName" %
             solventwrapper.configurationFile)
 
